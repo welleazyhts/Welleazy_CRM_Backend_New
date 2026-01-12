@@ -10,6 +10,9 @@ from apps.location.models import City
 from .models import DiagnosticCenter
 from .serializers import DiagnosticCenterSerializer
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from .filters import DiagnosticCenterFilter
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -186,6 +189,19 @@ class DiagnosticCenterViewSet(ModelViewSet):
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+    
+    # FILTERS----
+
+    
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = DiagnosticCenterFilter
+
+    search_fields = [
+        "name",
+        "center_code",
+        "location__area",
+        "location__pincode",
+    ]
 
     
     

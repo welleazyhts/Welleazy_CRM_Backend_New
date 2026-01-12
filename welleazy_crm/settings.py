@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     
     'apps.core',
     'apps.accounts',
+    'apps.diagnostic_center',
+    'apps.location',
     
     
     # Third-party apps
@@ -60,6 +62,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'django_filters',
+    
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -76,6 +80,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'welleazy_crm.urls'
+
+
 
 TEMPLATES = [
     {
@@ -159,6 +165,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
 }
 
 SIMPLE_JWT = {

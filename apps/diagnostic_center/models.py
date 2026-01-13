@@ -94,13 +94,25 @@ class DiagnosticLabCapabilities(BaseModel):
     endocrinology = models.BooleanField(default=False)
     cytology = models.BooleanField(default=False)
     immunology = models.BooleanField(default=False)
+    # Imaging Equipments---
 
     xray = models.BooleanField(default=False)
     digital_xray = models.BooleanField(default=False)
     ultrasound = models.BooleanField(default=False)
+    color_doppler = models.BooleanField(default=False)
+    mammogram = models.BooleanField(default=False)
     ct_scan = models.BooleanField(default=False)
     mri = models.BooleanField(default=False)
+    pet_scan = models.BooleanField(default=False)
+    nuclear_imaging = models.BooleanField(default=False)
 
+    # Cardiac Equipments---
+
+    ecg = models.BooleanField(default=False)
+    pft = models.BooleanField(default=False)
+    tmt = models.BooleanField(default=False)
+    _2d_echo = models.BooleanField(default=False)
+    fluoroscopy = models.BooleanField(default=False)
 
 
 # Diagnostic Staff Model
@@ -138,6 +150,7 @@ class DiagnosticAccreditation(BaseModel):
     nabl = models.BooleanField(default=False)
     cap = models.BooleanField(default=False)
     iso = models.BooleanField(default=False)
+    iso_type = models.CharField(max_length=100 )
 
     recognized_by = models.CharField(max_length=255, blank=True, null=True)
     details = models.TextField(blank=True, null=True)

@@ -37,5 +37,8 @@ urlpatterns = [
 
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),
+    path("api/", include("apps.diagnostic_center.urls")),
+    path("api/", include("apps.location.urls")),
+    
 
 ]

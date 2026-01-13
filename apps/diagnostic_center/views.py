@@ -54,6 +54,19 @@ class DiagnosticCenterViewSet(ModelViewSet):
             staff["bls_ambulance_count"] = 0
             staff["acls_ambulance_count"] = 0
         return None
+    
+    def _validate_accreditation(self, accreditation):
+        if accreditation.get("iso"):
+            if not accreditation.get("iso_type"):
+                return Response(
+                {"accreditation": "ISO type is required when ISO is selected"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            accreditation["iso_type"] = None
+        return None
+
+
 
     def _validate_agreement(self, agreement):
         if agreement.get("mou_signed") and not agreement.get("mou_signed_date"):

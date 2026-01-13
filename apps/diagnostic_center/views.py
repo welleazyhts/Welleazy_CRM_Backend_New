@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from apps.accounts.permissions import IsAdminUserJWT
 from apps.location.models import City
+from apps.vendors.models import Vendor
 from .models import DiagnosticCenter
 from .serializers import DiagnosticCenterSerializer
 from django.db import transaction
@@ -124,6 +125,17 @@ class DiagnosticCenterViewSet(ModelViewSet):
         if agreement_error:
             return agreement_error
 
+        vendor_id = data.get("vendor")
+
+        try:
+            data["vendor"] = Vendor.objects.get(id=vendor_id)
+        except Vendor.DoesNotExist:
+            return Response(
+                {"vendor": "Invalid vendor id"},
+                 status=status.HTTP_400_BAD_REQUEST
+             )
+
+
         center = DiagnosticCenter.objects.create(
             **data,
             created_by=request.user,
@@ -147,6 +159,16 @@ class DiagnosticCenterViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data.copy()
+
+        if "vendor" in data:
+            try:
+                data["vendor"] = Vendor.objects.get(id=data["vendor"])
+            except Vendor.DoesNotExist:
+                return Response(
+               {"vendor": "Invalid vendor id"},
+               status=status.HTTP_400_BAD_REQUEST
+        )
+
 
         # Update main center
         for field in [

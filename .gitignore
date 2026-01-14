@@ -12,9 +12,11 @@ __pycache__/
 venv/
 .venv/
 ENV/
+
+# Environment variables
 .env
-*.env
-.env*
+.env.*
+!.env.example
 
 # Logs
 logs/
@@ -26,11 +28,18 @@ media/
 staticfiles/
 static/
 
-# Migrations (only cache — not actual migration files!)
+# Migrations (cache only)
 */migrations/__pycache__/
 */migrations/*.pyc
 
-# VSCode / PyCharm
+# Python build/test
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
 .vscode/
 .idea/
 

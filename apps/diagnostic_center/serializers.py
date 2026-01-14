@@ -60,6 +60,7 @@ class DiagnosticAgreementSerializer(serializers.ModelSerializer):
 
 
 class DiagnosticCenterSerializer(serializers.ModelSerializer):
+    vendor_name = serializers.CharField(source="vendor.name", read_only=True)
     location = DiagnosticLocationSerializer()
     services = DiagnosticServicesSerializer(source="diagnosticservices")
     lab_capabilities = DiagnosticLabCapabilitiesSerializer(source="diagnosticlabcapabilities")

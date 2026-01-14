@@ -1,6 +1,7 @@
 from django.db import models
 from apps.core.models import BaseModel
 from apps.location.models import City
+from apps.vendors.models import Vendor
 
 # Create your models here.
 
@@ -30,7 +31,7 @@ class DiagnosticCenter(BaseModel):
 
     provider_type = models.CharField(max_length=50, choices=PROVIDER_TYPE_CHOICES)
     grade = models.CharField(max_length=10, choices=GRADE_CHOICES)
-    vendor = models.CharField(max_length=255)
+    vendor = models.ForeignKey(Vendor , on_delete=models.PROTECT, related_name="diagnostic_centers")
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

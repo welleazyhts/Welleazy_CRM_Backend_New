@@ -1,137 +1,121 @@
 from django.db import models
 from django.conf import settings
 from apps.core.models import BaseModel
-
-
-class Corporate(BaseModel):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-
-    class Meta:
-        abstract = True
+from apps.diagnostic_center.models import DiagnosticCenter
 
 
 class Case(BaseModel):
-    CUSTOMER_TYPE_CHOICES =[
-    ("INDIVIDUAL", "Individual"),
-    ("CORPORATE_EMPLOYEE", "Corporate Employee"),
-    ("DEPENDANT", "Dependant"),
-    ("HNI_VIP", "HNI/VIP"),]
-
     STATUS_CHOICES = [
-    ("NEW", "New"),
-    ("ASSIGNED", "Assigned"),
-    ("IN_PROGRESS", "In Progress"),
-    ("SCHEDULED", "Scheduled"),
-]
+        ("NEW", "New"),
+        ("ASSIGNED", "Assigned"),
+        ("IN_PROGRESS", "In Progress"),
+        ("SCHEDULED", "Scheduled"),
+    ]
+
     PRIORITY_CHOICES = [
-    ("LOW", "Low"),
-    ("NORMAL", "Normal"),
-    ("HIGH", "High"),
-    ("URGENT", "Urgent"),
-]
+        ("LOW", "Low"),
+        ("NORMAL", "Normal"),
+        ("HIGH", "High"),
+        ("URGENT", "Urgent"),
+    ]
 
     SOURCE_CHOICES = [
-    ("WEBSITE", "Website"),
-    ("MOBILE_APP", "Mobile App"),
-    ("CRM_MANUAL", "CRM Manual Entry"),
-    ("CALL_CENTER", "Call Center"),
-    ("EMAIL", "Email"),
-    ("WALK_IN", "Walk-in"),
-    ("HR_PORTAL", "HR Portal"),
-]
+        ("WEBSITE", "Website"),
+        ("MOBILE", "Mobile App"),
+        ("CRM", "CRM Manual Entry"),
+        ("CALL", "Call Center"),
+        ("EMAIL", "Email"),
+        ("WALKIN", "Walk-in"),
+        ("HR", "HR Portal"),
+    ]
 
-    SERVICE_TYPE_CHOICES = [
-    ("HOME_COLLECTION", "Home Collection"),
-    ("LAB_VISIT", "Lab Visit"),
-    ("DOCTOR_VISIT", "Doctor Visit"),
-]
+    CUSTOMER_TYPE = [
+        ("INDIVIDUAL", "Individual"),
+        ("CORPORATE", "Corporate Employee"),
+        ("DEPENDANT", "Dependant"),
+        ("VIP", "HNI/VIP"),
+    ]
 
-    VISIT_TYPE_CHOICES = [
-    ("HOME", "Home"),
-    ("CENTER", "Center"),
-]
+    patient_name = models.CharField(max_length=255)
+    patient_phone = models.CharField(max_length=15)
+    patient_email = models.EmailField(null=True, blank=True)
 
-    PAYMENT_TYPE_CHOICES = [
-    ("PREPAID", "Prepaid"),
-    ("POSTPAID", "Postpaid"),
-    ("CORPORATE", "Corporate Billing"),
-    ("INSURANCE", "Insurance"),
-]
+    customer_type = models.CharField(max_length=20, choices=CUSTOMER_TYPE)
 
-    # BASIC
+    corporate = models.ForeignKey("corporates.Corporate", null=True, blank=True, on_delete=models.SET_NULL)
+    employee_id = models.CharField(max_length=100, null=True, blank=True)
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NEW")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default="NORMAL")
-    source = models.CharField(max_length=30, choices=SOURCE_CHOICES)
-    service_type = models.CharField(max_length=30, choices=SERVICE_TYPE_CHOICES)
-    visit_type = models.CharField(max_length=20, choices=VISIT_TYPE_CHOICES)
-    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES)
-    patient_name = models.CharField(max_length=255, null=True, blank=True)
-    patient_phone = models.CharField(max_length=20, null=True, blank=True)
-    patient_email = models.EmailField(null=True, blank=True)
-    corporate = models.CharField(max_length=255, null=True, blank=True)
-    employee_id = models.CharField(max_length=100, null=True, blank=True)
-    customer_type = models.CharField(
-    max_length=30,
-    choices=CUSTOMER_TYPE_CHOICES,
-    default="INDIVIDUAL"
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES)
+
+class CaseServiceDetails(BaseModel):
+    SERVICE_TYPES = [
+        ("DIAGNOSTIC", "Diagnostic Test"),
+        ("DOCTOR", "Doctor Consultation"),
+        ("PHARMACY", "Pharmacy Order"),
+        ("PACKAGE", "Health Package"),
+        ("SPONSORED", "Sponsored Package"),
+        ("EYE", "Eye Care"),
+        ("DENTAL", "Dental Care"),
+        ("GYM", "Gym/Fitness"),
+    ]
+
+    VISIT_TYPE = [
+        ("HOME", "Home"),
+        ("CENTER", "At Center"),
+    ]
+
+    case = models.OneToOneField(Case, on_delete=models.CASCADE, related_name="service")
+
+    service_type = models.CharField(max_length=30, choices=SERVICE_TYPES)
+    visit_type = models.CharField(max_length=20, choices=VISIT_TYPE)
+
+    vendor = models.ForeignKey("vendors.Vendor", on_delete=models.SET_NULL, null=True)
+    diagnostic_center = models.ForeignKey(
+    "diagnostic_center.DiagnosticCenter",
+    on_delete=models.CASCADE,
+    null=True,
+    blank=True
 )
 
-    
-    
-    customer_type = models.CharField(
-    max_length=30,
-    choices=CUSTOMER_TYPE_CHOICES,
-    default="INDIVIDUAL"
-)
-   
 
 
-    
-    
 
-    # SERVICE
-    service_type = models.CharField(max_length=30, choices=SERVICE_TYPE_CHOICES)
-    visit_type = models.CharField(max_length=30, choices=VISIT_TYPE_CHOICES)
-    vendor = models.CharField(max_length=255, null=True, blank=True)
-    diagnostic_center = models.CharField(max_length=255, null=True, blank=True)
-    scheduled_date = models.DateField(null=True, blank=True)
-    scheduled_time = models.TimeField(null=True, blank=True)
-    service_address = models.TextField(null=True, blank=True)
+    scheduled_date = models.DateField(null=True)
+    scheduled_time = models.TimeField(null=True)
+    address = models.TextField(null=True)
+class CaseFinancialDetails(BaseModel):
+    PAYMENT_TYPE = [
+        ("PREPAID", "Prepaid"),
+        ("POSTPAID", "Postpaid"),
+        ("CORPORATE", "Corporate Billing"),
+        ("INSURANCE", "Insurance"),
+        ("COD", "Cash on Delivery"),
+    ]
 
-    # FINANCIAL
-    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    home_visit_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    service_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    employee_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    case = models.OneToOneField(Case, on_delete=models.CASCADE, related_name="financial")
 
-    # ADDITIONAL
-    received_by_name = models.CharField(max_length=255, null=True, blank=True)
-    received_by_phone = models.CharField(max_length=15, null=True, blank=True)
-    received_by_email = models.EmailField(null=True, blank=True)
-    department = models.CharField(max_length=255, null=True, blank=True)
-    followup_date = models.DateField(null=True, blank=True)
-    followup_remark = models.TextField(null=True, blank=True)
-    customer_notes = models.TextField(null=True, blank=True)
-    internal_notes = models.TextField(null=True, blank=True)
+    payment_type = models.CharField(max_length=30, choices=PAYMENT_TYPE)
 
-   
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=10, decimal_places=2)
+    home_visit_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    service_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    employee_to_pay = models.DecimalField(max_digits=10, decimal_places=2)
 
+    final_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
-    
+class CaseAdditionalDetails(BaseModel):
+    case = models.OneToOneField(Case, on_delete=models.CASCADE, related_name="additional")
 
-    def save(self, *args, **kwargs):
-        self.final_amount = (
-            self.total_amount
-            - self.discount
-            + self.home_visit_charge
-            + self.service_charge
-            - self.employee_to_pay
-        )
-        super().save(*args, **kwargs)
+    received_by_name = models.CharField(max_length=255)
+    received_by_phone = models.CharField(max_length=20)
+    received_by_email = models.EmailField()
+    department = models.CharField(max_length=100)
+
+    followup_date = models.DateField(null=True)
+    followup_remark = models.TextField(null=True)
+
+    notes = models.TextField()
+    internal_notes = models.TextField()

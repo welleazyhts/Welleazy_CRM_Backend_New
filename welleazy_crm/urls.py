@@ -33,12 +33,7 @@ urlpatterns = [
     
     path("api/admin/login/", AdminLoginAPIView.as_view()),
     path("api/admin/logout/", AdminLogoutAPIView.as_view()),
-    path("api/", include("apps.cases.urls")),
 
     path('api/token/', TokenObtainPairView.as_view()),
-    path('api/token/refresh/', TokenRefreshView.as_view()),
-    path("api/", include("apps.diagnostic_center.urls")),
-    path("api/", include("apps.location.urls")),
-    
-
+    path('api/token/refresh/', TokenRefreshView.as_view()),    
 ]

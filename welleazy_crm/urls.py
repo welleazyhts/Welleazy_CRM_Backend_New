@@ -27,6 +27,7 @@ from apps.accounts.views import (
     AdminLoginAPIView,
     AdminLogoutAPIView,
 )
+from apps.master_management.urls import urlpatterns as master_management_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,4 +37,6 @@ urlpatterns = [
 
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),    
+    
+    path('api/', include(master_management_urls)),
 ]

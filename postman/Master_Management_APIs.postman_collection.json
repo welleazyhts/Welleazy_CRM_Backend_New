@@ -1,0 +1,3373 @@
+{
+	"info": {
+		"_postman_id": "master-management-collection-2026",
+		"name": "Master Management APIs",
+		"description": "Complete CRUD operations for all Master Management endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "States",
+			"item": [
+				{
+					"name": "List All States",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/states/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Active States",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/states/?is_active=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								""
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search States",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/states/?search=Maharashtra",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Maharashtra"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create State",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Maharashtra\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/states/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get State by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/states/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update State",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Maharashtra Updated\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/states/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Partial Update State",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_active\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/states/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete State",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/states/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"states",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cities",
+			"item": [
+				{
+					"name": "List All Cities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Cities by State",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/?state=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								""
+							],
+							"query": [
+								{
+									"key": "state",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Active Cities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/?is_active=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								""
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Cities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/?search=Mumbai",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Mumbai"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create City",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mumbai\",\n    \"state\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/cities/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get City by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update City",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mumbai\",\n    \"state\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/cities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete City",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"cities",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Master Branches",
+			"item": [
+				{
+					"name": "List All Branches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-branches/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Branches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-branches/?search=Central",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Central"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Branch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Central Branch\",\n    \"states\": [1, 2],\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-branches/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Branch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-branches/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Branch",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Central Branch Updated\",\n    \"states\": [1, 3],\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-branches/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Branch",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-branches/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-branches",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Master Products",
+			"item": [
+				{
+					"name": "List All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Products by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-products/?product_for=Physical",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								""
+							],
+							"query": [
+								{
+									"key": "product_for",
+									"value": "Physical"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-products/?search=Product",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Product"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Product Name\",\n    \"product_for\": \"Physical\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Product\",\n    \"product_for\": \"Consultation\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-products",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Product Sub Categories",
+			"item": [
+				{
+					"name": "List All Sub Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Product Sub Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/?search=Category",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Category"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Sub Category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sub Category Name\",\n    \"normal_price\": \"100.00\",\n    \"hni_price\": \"150.00\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sub Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Sub Category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Sub Category\",\n    \"normal_price\": \"120.00\",\n    \"hni_price\": \"180.00\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Sub Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-product-sub-categories/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-product-sub-categories",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Service Mappings",
+			"item": [
+				{
+					"name": "List All Mappings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/service-mappings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/service-mappings/?product=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								""
+							],
+							"query": [
+								{
+									"key": "product",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Service Mappings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/service-mappings/?search=Product",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Product"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Mapping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": 1,\n    \"sub_products\": [1, 2, 3]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/service-mappings/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Mapping by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/service-mappings/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Mapping",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": 1,\n    \"sub_products\": [2, 4]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/service-mappings/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Mapping",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/service-mappings/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"service-mappings",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor Qualifications",
+			"item": [
+				{
+					"name": "List All Qualifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Doctor Qualifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/?search=MBBS",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "MBBS"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Qualification",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"MBBS\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Qualification by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Qualification",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"MD\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Qualification",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-qualifications/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-qualifications",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor Specializations",
+			"item": [
+				{
+					"name": "List All Specializations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter Active Specializations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/?is_active=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								""
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Specializations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/?search=Cardiology",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Cardiology"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Specialization",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Cardiology",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Specialization by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Specialization",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Cardiology Updated",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Specialization",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctor-specializations/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor-specializations",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Master Permissions",
+			"item": [
+				{
+					"name": "List All Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-permissions/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-permissions/?search=Management",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Management"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Permission",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"User Management\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-permissions/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Permission by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Permission",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"User Management Updated\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Permission",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Master Sub Permissions",
+			"item": [
+				{
+					"name": "List All Sub Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Permission",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/?permission=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								""
+							],
+							"query": [
+								{
+									"key": "permission",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Sub Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/?search=Create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Create"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Sub Permission",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Create User\",\n    \"permission\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sub Permission by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Sub Permission",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Edit User\",\n    \"permission\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Sub Permission",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-sub-permissions/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-sub-permissions",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Type of Insurance",
+			"item": [
+				{
+					"name": "List All Insurance Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Type Of Insurances",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/?search=Health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Health"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Insurance Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Health Insurance\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Insurance Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Insurance Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Life Insurance\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Insurance Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-insurances/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-insurances",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Insurance Companies",
+			"item": [
+				{
+					"name": "List All Companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Insurance Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/?type_of_insurance=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								""
+							],
+							"query": [
+								{
+									"key": "type_of_insurance",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Insurance Companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/?search=HDFC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "HDFC"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Insurance Company",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"HDFC Life\",\n    \"type_of_insurance\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Company by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Company",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"ICICI Prudential\",\n    \"type_of_insurance\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Company",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-insurance-companies/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-insurance-companies",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Specialities",
+			"item": [
+				{
+					"name": "List All Specialities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialities/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Specialities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialities/?search=Cardiology",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Cardiology"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Speciality",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cardiology\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-specialities/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Speciality by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Speciality",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Neurology\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-specialities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Speciality",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialities/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialities",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Type of Provider",
+			"item": [
+				{
+					"name": "List All Provider Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Type Of Providers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/?search=Hospital",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Hospital"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Provider Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hospital\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Provider Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Provider Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Clinic\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Provider Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-type-of-providers/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-type-of-providers",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Medical Surgery Types",
+			"item": [
+				{
+					"name": "List All Surgery Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Medical Surgery Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/?search=Cardiac",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Cardiac"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Surgery Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cardiac Surgery\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Surgery Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Surgery Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Orthopedic Surgery\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Surgery Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgery-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgery-types",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Medical Surgeries",
+			"item": [
+				{
+					"name": "List All Surgeries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Filter by Surgery Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/?surgery_type=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								""
+							],
+							"query": [
+								{
+									"key": "surgery_type",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Medical Surgeries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/?search=Surgery",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Surgery"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Surgery",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Bypass Surgery\",\n    \"surgery_type\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Surgery by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Surgery",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Angioplasty\",\n    \"surgery_type\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Surgery",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-medical-surgeries/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-medical-surgeries",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pharmacy Partners",
+			"item": [
+				{
+					"name": "List All Partners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Pharmacy Partners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/?search=Pharmacy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Pharmacy"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Partner",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Apollo Pharmacy\",\n    \"partner_site\": \"https://www.apollopharmacy.in\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Partner by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Partner",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Medplus\",\n    \"partner_site\": \"https://www.medplusmart.com\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Partner",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-pharmacy-partners/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-pharmacy-partners",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "MER Types",
+			"item": [
+				{
+					"name": "List All MER Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Mer Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/?search=Type",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Type"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create MER Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Type A\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get MER Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update MER Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Type B\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete MER Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-mer-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-mer-types",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Master Visit Types",
+			"item": [
+				{
+					"name": "List All Visit Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-visit-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-visit-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Visit Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Home\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-visit-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-visit-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Visit Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-visit-types/?search=Home",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-visit-types",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Home"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Generic Tests",
+			"item": [
+				{
+					"name": "List All Generic Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Generic Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/?search=Blood",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Blood"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Generic Test",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visit_type\": 1,\n    \"name\": \"Blood Test\",\n    \"test_code\": \"BT001\",\n    \"normal_test_price\": \"500.00\",\n    \"hni_test_price\": \"750.00\",\n    \"description\": \"Complete blood count test\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Generic Test by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Generic Test",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visit_type\": 1,\n    \"name\": \"Blood Test Updated\",\n    \"test_code\": \"BT001\",\n    \"normal_test_price\": \"600.00\",\n    \"hni_test_price\": \"850.00\",\n    \"description\": \"Updated description\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Generic Test",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-generic-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-generic-tests",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Specialties Tests",
+			"item": [
+				{
+					"name": "List All Specialties Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Specialties Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/?search=Test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Test"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Specialties Test",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visit_type\": 1,\n    \"name\": \"ECG Test\",\n    \"test_code\": \"ECG001\",\n    \"normal_test_price\": \"300.00\",\n    \"hni_test_price\": \"450.00\",\n    \"description\": \"Electrocardiogram test\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Specialties Test by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Specialties Test",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visit_type\": 1,\n    \"name\": \"ECG Test Updated\",\n    \"test_code\": \"ECG001\",\n    \"normal_test_price\": \"350.00\",\n    \"hni_test_price\": \"500.00\",\n    \"description\": \"Updated ECG test\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Specialties Test",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-specialties-tests/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-specialties-tests",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Upload Formats",
+			"item": [
+				{
+					"name": "List All Upload Formats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-upload-formats/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-upload-formats",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Upload Format by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-upload-formats/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-upload-formats",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Upload Format",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-upload-formats/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-upload-formats",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Login Types",
+			"item": [
+				{
+					"name": "List All Login Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/login-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Login Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master-login-types/?search=Email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"master-login-types",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Email"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Login Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Email\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/login-types/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-types",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Login Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/login-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Login Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Phone\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/login-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-types",
+								"1",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Login Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/login-types/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-types",
+								"1",
+								""
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

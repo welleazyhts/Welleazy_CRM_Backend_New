@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # Local apps
     'apps.core',
     'apps.accounts',
+    'apps.master_management',
     
     # Third-party apps
     'rest_framework',

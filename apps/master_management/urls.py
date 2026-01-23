@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (MasterProductViewSet, MasterProductSubCategoryViewSet, 
+from .views import (MasterProductViewSet, MasterProductForViewSet, MasterProductSubCategoryViewSet, 
                     MasterBranchViewSet, ServiceMappingViewSet, StateViewSet, CityViewSet,
                     DoctorQualificationViewSet, DoctorSpecializationViewSet, MasterPermissionViewSet,
                     MasterSubPermissionViewSet, MasterTypeOfInsuranceViewSet,
@@ -13,6 +13,7 @@ from .views import (MasterProductViewSet, MasterProductSubCategoryViewSet,
 
 router = DefaultRouter()
 router.register(r'master-products', MasterProductViewSet)
+router.register(r'master-product-fors', MasterProductForViewSet)
 router.register(r'master-product-sub-categories', MasterProductSubCategoryViewSet)
 router.register(r'service-mappings', ServiceMappingViewSet)
 router.register(r'states', StateViewSet)

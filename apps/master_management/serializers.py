@@ -1,18 +1,33 @@
 from rest_framework import serializers
-from .models import (MasterProduct, MasterProductSubCategory, ServiceMapping, 
+from .models import (MasterProduct, MasterProductFor, MasterProductSubCategory, ServiceMapping, 
                      State, City, MasterBranch, DoctorQualification, DoctorSpecialization, MasterPermission, MasterSubPermission,
                     MasterTypeOfInsurance, MasterInsuranceCompany, MasterSpeciality,
                     MasterTypeOfProvider, MasterMedicalSurgeryType, MasterMedicalSurgery,
                     MasterPharmacyPartner, MasterMERType, MasterVisitType, MasterGenericTest,
                     MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType)
 
-class MasterProductSerializer(serializers.ModelSerializer):
+class MasterProductForSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)
     updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
 
     class Meta:
+        model = MasterProductFor
+        fields = '__all__'
+
+class MasterProductSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
+    product_for_details = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
         model = MasterProduct
         fields = '__all__'
+    
+    def get_product_for_details(self, obj):
+        return [
+            {'id': pf.id, 'name': pf.name} 
+            for pf in obj.product_for.all()
+        ]
 
 class MasterProductSubCategorySerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)

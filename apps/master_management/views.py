@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import (MasterProduct, MasterProductSubCategory, ServiceMapping, 
+from .models import (MasterProduct, MasterProductFor, MasterProductSubCategory, ServiceMapping, 
                     State, City, MasterBranch, DoctorQualification, DoctorSpecialization, MasterPermission, MasterSubPermission,
                     MasterTypeOfInsurance, MasterInsuranceCompany, MasterSpeciality,
                     MasterTypeOfProvider, MasterMedicalSurgeryType, MasterMedicalSurgery,
@@ -9,7 +9,7 @@ from .models import (MasterProduct, MasterProductSubCategory, ServiceMapping,
                     MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType,
                     )
 from .serializers import (
-    MasterProductSerializer, MasterProductSubCategorySerializer,
+    MasterProductSerializer, MasterProductForSerializer, MasterProductSubCategorySerializer,
     ServiceMappingSerializer, StateSerializer, CitySerializer, MasterBranchSerializer, DoctorQualificationSerializer,
     DoctorSpecializationSerializer, MasterPermissionSerializer, MasterSubPermissionSerializer,
     MasterTypeOfInsuranceSerializer, MasterInsuranceCompanySerializer,
@@ -23,6 +23,20 @@ from .filters import (
     MasterInsuranceCompanyFilter,
     MasterPharmacyPartnerFilter
     )
+
+class MasterProductForViewSet(viewsets.ModelViewSet):
+    queryset = MasterProductFor.objects.all().order_by('name')
+    serializer_class = MasterProductForSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['is_active']
+    search_fields = ['name']
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
 
 class MasterProductViewSet(viewsets.ModelViewSet):
     queryset = MasterProduct.objects.all().order_by('name')

@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     # Local apps
     'apps.core',
     'apps.accounts',
-    
+    'apps.service_provider_master',
+
     # Third-party apps
     'rest_framework',
     'rest_framework.authtoken',

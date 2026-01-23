@@ -35,5 +35,7 @@ urlpatterns = [
     path("api/admin/logout/", AdminLogoutAPIView.as_view()),
 
     path('api/token/', TokenObtainPairView.as_view()),
-    path('api/token/refresh/', TokenRefreshView.as_view()),    
+    path('api/token/refresh/', TokenRefreshView.as_view()),  
+    path("api/physical-medicals/", include("apps.physical_medicals.urls")),  
+    
 ]

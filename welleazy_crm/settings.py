@@ -52,11 +52,10 @@ INSTALLED_APPS = [
     # Local apps
     'apps.core',
     'apps.accounts',
-<<<<<<< HEAD
     'apps.physical_medicals',
-=======
     'apps.master_management',
->>>>>>> 675886c4885e3f1372178e9fe89d3235b71325ab
+    'apps.physical_medical_master',
+
     
     # Third-party apps
     'rest_framework',

@@ -42,4 +42,9 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view()),    
     
     path('api/', include(master_management_urls)),
+    path(
+    "api/physical-medical-master/",
+    include("apps.physical_medical_master.urls")
+),
+
 ]

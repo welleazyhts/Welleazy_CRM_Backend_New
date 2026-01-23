@@ -1,3 +1,60 @@
 from django.db import models
+from apps.core.models import BaseModel
 
-# Create your models here.
+class BaseMaster(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name
+# ---------- Case related ----------
+class CaseReceivedMode(BaseMaster): 
+    pass
+
+class CaseType(BaseMaster): 
+    pass
+
+class PaymentType(BaseMaster): 
+    pass
+
+class CaseFor(BaseMaster): 
+    pass
+
+class PreferredVisitType(BaseMaster): 
+    pass
+
+class CaseStatus(BaseMaster): 
+    pass
+
+
+# ---------- Client related ----------
+class BranchZone(BaseMaster): 
+    pass
+
+class CustomerType(BaseMaster): 
+    pass
+
+class ServiceOffered(BaseMaster): 
+    pass
+
+
+# ---------- Customer related ----------
+class Gender(BaseMaster): 
+    pass
+
+
+# ---------- Case detail related ----------
+class MedicalTest(BaseMaster): 
+    pass
+
+class GenericTest(BaseMaster): 
+    pass
+
+class CustomerProfile(BaseMaster): 
+    pass
+
+class DhocPaymentOption(BaseMaster): 
+    pass

@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.service_provider_master',
 
+    'apps.master_management',
+    
     # Third-party apps
     'rest_framework',
     'rest_framework.authtoken',

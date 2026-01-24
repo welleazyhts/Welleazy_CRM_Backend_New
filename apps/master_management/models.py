@@ -191,7 +191,7 @@ class MasterSpecialtiesTest(BaseModel):
 
 class MasterUploadFormat(BaseModel):
     name = models.CharField(max_length=255, unique=True)
-    upload_format = models.FileField(upload_to='upload_formats/')
+    upload_format = models.FileField(upload_to='media/upload_formats/')
     
     def __str__(self):
         return self.name 

@@ -19,6 +19,9 @@ from .serializers import (
     MasterSpecialtiesTestSerializer, MasterUploadFormatSerializer, MasterLoginTypeSerializer
     )
 from .filters import (
+    MasterProductFilter,
+    CityFilter,
+    MasterMedicalSurgeryFilter,
     MasterSubPermissionFilter, 
     MasterInsuranceCompanyFilter,
     MasterPharmacyPartnerFilter
@@ -43,7 +46,7 @@ class MasterProductViewSet(viewsets.ModelViewSet):
     serializer_class = MasterProductSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['name', 'is_active', 'product_for']
+    filterset_class = MasterProductFilter
     search_fields = ['name']
 
     def perform_create(self, serializer):
@@ -99,7 +102,7 @@ class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['is_active', 'state']
+    filterset_class = CityFilter
     search_fields = ['name', 'state__name']
 
     def perform_create(self, serializer):
@@ -252,7 +255,7 @@ class MasterMedicalSurgeryViewSet(viewsets.ModelViewSet):
     serializer_class = MasterMedicalSurgerySerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['is_active', 'surgery_type']
+    filterset_class = MasterMedicalSurgeryFilter
     search_fields = ['name', 'surgery_type__name']
 
     def perform_create(self, serializer):

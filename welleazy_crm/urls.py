@@ -29,6 +29,9 @@ from apps.accounts.views import (
 )
 from apps.master_management.urls import urlpatterns as master_management_urls
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
@@ -40,3 +43,6 @@ urlpatterns = [
     
     path('api/', include(master_management_urls)),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

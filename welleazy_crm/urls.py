@@ -27,7 +27,7 @@ from apps.accounts.views import (
     AdminLoginAPIView,
     AdminLogoutAPIView,
 )
-from apps.master_management.urls import urlpatterns as master_management_urls
+
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -41,8 +41,16 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),    
     
-    path('api/', include(master_management_urls)),
+    path('api/master-management/', include('apps.master_management.urls')),
+    path('api/client-masters/', include('apps.client_masters.urls')),
+    path('api/clients/', include('apps.client.urls')),
+    path('api/client-branches/', include('apps.client_branch.urls')),
+    path('api/client-product-services/', include('apps.client_product_service.urls')),
+    path('api/client-customers/', include('apps.client_customer.urls')),
+    path('api/client-customer-login/', include('apps.client_customer_login.urls')),
+    path('api/sub-clients/', include('apps.sub_client.urls')),
 ]
+    
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

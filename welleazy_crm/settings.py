@@ -53,6 +53,13 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.accounts',
     'apps.master_management',
+    'apps.client_masters',
+    'apps.client',
+    'apps.client_branch',
+    'apps.client_product_service',
+    'apps.client_customer',
+    'apps.client_customer_login',
+    'apps.sub_client',
     
     # Third-party apps
     'rest_framework',

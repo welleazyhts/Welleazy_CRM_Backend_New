@@ -41,7 +41,7 @@ class PhysicalMedicalAddCaseAPI(APIView):
                 "branch_zone": data.get("branch_zone"),
                 "branch_name": data["branch_name"],
                 "customer_type": data["customer_type"],
-                "product_name": data["product_name"],
+                "product": data["product"],
                 "services_offered": data["services_offered"],
                 "received_by": data.get("received_by"),
                 "mobile_number": data.get("client_mobile"),

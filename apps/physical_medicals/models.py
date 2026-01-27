@@ -1,4 +1,15 @@
 from django.db import models
+from django.db import models
+
+from apps.master_management.models import (
+    MasterProduct,
+    State,
+    City,
+    ServiceMapping, 
+    MasterGenericTest
+)
+
+
 class PhysicalMedicalCase(models.Model):
     case_id = models.CharField(max_length=20, unique=True)
 
@@ -26,8 +37,18 @@ class PhysicalMedicalClientDetail(models.Model):
 
     customer_type = models.CharField(max_length=20)  # Employee / Candidate
 
-    product_name = models.CharField(max_length=100)
-    services_offered = models.CharField(max_length=255)
+    product = models.ForeignKey(
+        MasterProduct,
+        on_delete=models.PROTECT,
+        related_name="physical_medical_clients"
+    )
+    services_offered = models.ForeignKey(
+        ServiceMapping,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="physical_medical_services"
+    )
 
     received_by = models.CharField(max_length=100, blank=True, null=True)
     mobile_number = models.CharField(max_length=15, blank=True, null=True)
@@ -49,19 +70,19 @@ class PhysicalMedicalCustomerDetail(models.Model):
     gender = models.CharField(max_length=10)
     email_id = models.EmailField()
 
-    state = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
-    pincode = models.CharField(
-    max_length=10,
-    null=True,
-    blank=True
-)
+    state = models.ForeignKey(State,on_delete=models.PROTECT,related_name="physical_medical_cases")
+    
+    city = models.ForeignKey(
+        City,
+        on_delete=models.PROTECT,
+        related_name="physical_medical_cases"
+    )
 
 
     address = models.TextField()
     area = models.CharField(max_length=100)
     landmark = models.CharField(max_length=100)
-
+    pincode = models.CharField(max_length=100)
     date_of_birth = models.DateField(blank=True, null=True)
     geo_location = models.CharField(max_length=255, blank=True, null=True)
 class PhysicalMedicalCaseDetail(models.Model):
@@ -72,12 +93,10 @@ class PhysicalMedicalCaseDetail(models.Model):
     )
 
     medical_test = models.CharField(max_length=100)
-    generic_test = models.CharField(
-    max_length=100,
-    null=True,
-    blank=True
-)
-
+    generic_test = models.ForeignKey(MasterGenericTest,on_delete=models.PROTECT,related_name="physical_medical_cases",
+        blank=True,
+        null=True
+    )
 
     customer_profile = models.CharField(max_length=50)
     customer_pay_amount = models.DecimalField(

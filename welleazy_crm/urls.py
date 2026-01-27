@@ -38,8 +38,15 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),  
     path("api/physical-medicals/", include("apps.physical_medicals.urls")),  
+    path("api/second-opinion/", include("apps.second_opinion.urls")),
     
     path('api/token/refresh/', TokenRefreshView.as_view()),    
+    path(
+    'api/second-opinion-master/',
+    include('apps.second_opinion_master.urls')
+),
+
+
     
     path('api/', include(master_management_urls)),
     path(

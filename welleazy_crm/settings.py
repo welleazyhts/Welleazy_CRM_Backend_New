@@ -54,11 +54,21 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.physical_medicals',
     'apps.master_management',
+<<<<<<< HEAD
     'apps.physical_medical_master',
     'apps.second_opinion_master',
     'apps.second_opinion',
     
 
+=======
+    'apps.client_masters',
+    'apps.client',
+    'apps.client_branch',
+    'apps.client_product_service',
+    'apps.client_customer',
+    'apps.client_customer_login',
+    'apps.sub_client',
+>>>>>>> 666905a6698601174bc03b835c83b732f36c9a46
     
     # Third-party apps
     'rest_framework',
@@ -154,6 +164,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])

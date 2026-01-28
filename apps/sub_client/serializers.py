@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import SubClient, SubClientSPOC
 from apps.client.models import Client
 from apps.client.serializers import ClientSerializer
+from apps.client_masters.models import Designation
 from django.db import transaction
 import json
 
@@ -12,8 +13,20 @@ class SubClientSPOCSerializer(serializers.ModelSerializer):
         model = SubClientSPOC
         fields = ['id', 'name', 'contact_no', 'mobile_no', 'email_id', 'designation', 'designation_name']
 
+class SubClientSPOCPayloadSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+    name = serializers.CharField(required=True)
+    contact_no = serializers.CharField(required=True)
+    mobile_no = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    email_id = serializers.EmailField(required=False, allow_null=True, allow_blank=True)
+    designation = serializers.PrimaryKeyRelatedField(
+        queryset=Designation.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
 class SubClientSerializer(serializers.ModelSerializer):
-    spocs = SubClientSPOCSerializer(many=True, required=False)
+    spocs = SubClientSPOCPayloadSerializer(many=True, required=False)
     client_name = serializers.CharField(source='client.corporate_name', read_only=True)
     corporate_type_name = serializers.CharField(source='corporate_type.name', read_only=True)
 
@@ -31,26 +44,7 @@ class SubClientSerializer(serializers.ModelSerializer):
             'created_by', 'created_by_name', 'updated_by', 'updated_by_name'
         ]
 
-    @transaction.atomic
-    def create(self, validated_data):
-        spocs_data = validated_data.pop('spocs', [])
-        sub_client = SubClient.objects.create(**validated_data)
-        
-        for spoc_data in spocs_data:
-            SubClientSPOC.objects.create(sub_client=sub_client, **spoc_data)
-            
-        return sub_client
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        spocs_data = validated_data.pop('spocs', [])
-        
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        
-        if spocs_data:
-            for spoc_data in spocs_data:
-                SubClientSPOC.objects.create(sub_client=instance, **spoc_data)
-                
-        return instance
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['spocs'] = SubClientSPOCSerializer(instance.spocs.all(), many=True).data
+        return ret

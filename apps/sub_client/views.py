@@ -17,37 +17,50 @@ class SubClientViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'mobile_no', 'email_id', 'client__corporate_name']
     ordering_fields = ['created_at', 'name']
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = SubClientSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        validated = serializer.validated_data
+
+        sub_client = SubClient(
+            created_by=request.user if request.user.is_authenticated else None,
+            updated_by=request.user if request.user.is_authenticated else None,
+        )
+
+        self._save_sub_client_fields(sub_client, validated)
+        sub_client.save()
+
+        self._save_spocs(sub_client, validated)
+
         return Response(
             {
                 "message": "Sub Client created successfully",
-                "data": serializer.data
+                "data": SubClientSerializer(sub_client).data
             },
             status=status.HTTP_201_CREATED
         )
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user if self.request.user.is_authenticated else None)
-
+    @transaction.atomic
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        sub_client = self.get_object()
+        serializer = SubClientSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        validated = serializer.validated_data
+
+        sub_client.updated_by = request.user if request.user.is_authenticated else None
+        self._save_sub_client_fields(sub_client, validated)
+        sub_client.save()
+
+        self._save_spocs(sub_client, validated)
+
         return Response(
             {
                 "message": "Sub Client updated successfully",
-                "data": serializer.data
+                "data": SubClientSerializer(sub_client).data
             },
             status=status.HTTP_200_OK
         )
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user if self.request.user.is_authenticated else None)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -56,6 +69,69 @@ class SubClientViewSet(viewsets.ModelViewSet):
             {"message": "Sub Client deleted successfully"},
             status=status.HTTP_200_OK
         )
+
+    # HELPER METHODS
+
+    def _save_sub_client_fields(self, sub_client, validated):
+        simple_fields = [
+            'name', 'mobile_no', 'landline_no', 'email_id',
+            'head_office_address', 'branch_office_address',
+            'source', 'lead_by', 'is_active'
+        ]
+        
+        for field in simple_fields:
+            if field in validated:
+                setattr(sub_client, field, validated[field])
+        
+        fk_fields = ['client', 'corporate_type']
+        for field in fk_fields:
+            if field in validated:
+                setattr(sub_client, field, validated[field])
+
+    def _save_spocs(self, sub_client, validated):
+        if "spocs" not in validated:
+            return
+
+        spocs_data = validated["spocs"]
+        keep_ids = []
+
+        for spoc_data in spocs_data:
+            spoc_id = spoc_data.get("id")
+
+            if spoc_id:
+                # UPDATE existing
+                spoc = SubClientSPOC.objects.filter(
+                    id=spoc_id,
+                    sub_client=sub_client
+                ).first()
+
+                if not spoc:
+                    from rest_framework.exceptions import ValidationError
+                    raise ValidationError({
+                        "spocs": f"Invalid SPOC id {spoc_id} for this sub client"
+                    })
+
+                for field, value in spoc_data.items():
+                    setattr(spoc, field, value)
+
+                spoc.updated_by = sub_client.updated_by
+                spoc.save()
+                keep_ids.append(spoc.id)
+
+            else:
+                # CREATE new
+                spoc = SubClientSPOC.objects.create(
+                    sub_client=sub_client,
+                    created_by=sub_client.created_by,
+                    updated_by=sub_client.updated_by,
+                    **spoc_data
+                )
+                keep_ids.append(spoc.id)
+
+        # DELETE removed SPOCs
+        SubClientSPOC.objects.filter(
+            sub_client=sub_client
+        ).exclude(id__in=keep_ids).delete()
 
     @action(detail=True, methods=["delete"], url_path="spocs/delete")
     def delete_spoc(self, request, pk=None):

@@ -21,7 +21,7 @@ class Client(BaseModel):
     
     # Address Info
     head_office_address = models.TextField(blank=True, null=True)
-    branch_office_addresses = models.TextField(blank=True, null=True) # Can be JSON or comma separated
+    branch_office_address = models.TextField(blank=True, null=True) # Can be JSON or comma separated
     
     # Sales/Ops Info
     source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True, blank=True)
@@ -53,7 +53,7 @@ class Client(BaseModel):
     members_sponsored = models.ManyToManyField(MemberRelationType, blank=True)
     
     case_registration_mail_auto_triggered = models.BooleanField(default=False)
-    separate_account = models.BooleanField(default=False)
+    separate_access = models.BooleanField(default=False)
     
     # Visit/Partnership
     visit_type = models.ForeignKey(VisitType, on_delete=models.SET_NULL, null=True, blank=True)

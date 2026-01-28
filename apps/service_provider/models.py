@@ -16,10 +16,11 @@ from apps.service_provider_master.models import (
     VoucherDiscountType,
     DCUniqueName,
     PaymentTerm,
-    Client,
+  
     DepartmentType
 )
 
+from apps.client.models import Client
 from apps.master_management.models import (
     City,
     MasterTypeOfProvider,
@@ -338,8 +339,7 @@ class ProviderDocuments(BaseModel):
     mou_signed_copy = models.FileField(upload_to=upload_to, null=True, blank=True)
     other_document = models.FileField(upload_to=upload_to, null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+  
 
     def __str__(self):
         return f"Documents for {self.provider.center_name}"

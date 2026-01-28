@@ -58,6 +58,10 @@ urlpatterns = [
     path('api/client-customers/', include('apps.client_customer.urls')),
     path('api/client-customer-login/', include('apps.client_customer_login.urls')),
     path('api/sub-clients/', include('apps.sub_client.urls')),
+    path('api/test_management_master/', include('apps.test_management_master.urls')),
+    path('api/',include('apps.test_individual.urls')),
+    path("api/", include("apps.test_package.urls")),
+
 ]
     
 

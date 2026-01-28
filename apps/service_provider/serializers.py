@@ -131,7 +131,7 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_client_company_names(self, obj):
-        return list(obj.client_company.values_list("name", flat=True))
+        return list(obj.client_company.values_list("corporate_name", flat=True))
 
     def get_medical_specialties_names(self, obj):
         return list(obj.medical_specialties.values_list("name", flat=True))

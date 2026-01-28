@@ -94,15 +94,7 @@ class Accreditation(BaseModel):
         return self.name
 
 
-#DUMMY MODELS TO BE DELETED LATER-----
 
 
-
-    
-class Client(BaseModel):
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
 
 

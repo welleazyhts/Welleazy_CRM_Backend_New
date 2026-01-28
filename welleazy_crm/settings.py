@@ -63,6 +63,9 @@ INSTALLED_APPS = [
     'apps.client_customer',
     'apps.client_customer_login',
     'apps.sub_client',
+    'apps.test_management_master',
+    'apps.test_individual',
+    'apps.test_package',
     
     # Third-party apps
     'rest_framework',

@@ -183,29 +183,29 @@ class ServiceProviderViewSet(ModelViewSet):
         )
 
     # ---------------- UPDATE ----------------
+    
+
     @transaction.atomic
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()   # ✅ gets provider using pk
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=True
-        )
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         user = request.user
 
-        # -----------------------------
-        # 1. SIMPLE FIELDS
-        # -----------------------------
+    # -----------------------------------
+    # 1. SIMPLE FIELDS
+    # -----------------------------------
         simple_fields = [
-            "center_name", "email", "mobile", "landline", "std_code", "fax",
-            "plot_no", "address", "area", "pin_code", "service_pin_code",
-            "website", "vendor_registration_name",
-            "mou_signed", "mou_received_date", "remarks",
-            "corporate_group", "status", "is_active",
-            "provider_type", "partnership_type",
-            "specialty_type", "ownership_type",
-            "visit_type", "city", "state", "dc_unique_name"
-        ]
+        "center_name", "email", "mobile", "landline", "std_code", "fax",
+        "plot_no", "address", "area", "pin_code", "service_pin_code",
+        "website", "vendor_registration_name",
+        "mou_signed", "mou_received_date", "remarks",
+        "corporate_group", "status", "is_active",
+        "provider_type", "partnership_type",
+        "specialty_type", "ownership_type",
+        "visit_type", "city", "state", "dc_unique_name"
+    ]
 
         for field in simple_fields:
             if field in data:
@@ -214,18 +214,18 @@ class ServiceProviderViewSet(ModelViewSet):
         instance.updated_by = user
         instance.save()
 
-        # -----------------------------
-        # 2. MANY-TO-MANY
-        # -----------------------------
+    # -----------------------------------
+    # 2. MANY TO MANY
+    # -----------------------------------
         if "client_company" in data:
             instance.client_company.set(data["client_company"])
 
         if "medical_specialties" in data:
             instance.medical_specialties.set(data["medical_specialties"])
 
-        # -----------------------------
-        # 3. ONE-TO-ONE TABLES
-        # -----------------------------
+    # -----------------------------------
+    # 3. ONE TO ONE TABLES
+    # -----------------------------------
         if "manpower" in data:
             ProviderManpower.objects.update_or_create(
                 provider=instance,
@@ -236,22 +236,22 @@ class ServiceProviderViewSet(ModelViewSet):
             BankDetails.objects.update_or_create(
                 provider=instance,
                 defaults={**data["bank"], "updated_by": user}
-            )
+        )
 
         if "recognition" in data:
-            rec = data["recognition"]
-            obj, _ = ProviderRecognition.objects.get_or_create(
+            rec_data = data["recognition"]
+            rec_obj, _ = ProviderRecognition.objects.get_or_create(
                 provider=instance,
                 defaults={"created_by": user}
             )
-            obj.recognitions.set(rec.get("recognitions", []))
-            obj.accreditations.set(rec.get("accreditations", []))
-            obj.updated_by = user
-            obj.save()
+            rec_obj.recognitions.set(rec_data.get("recognitions", []))
+            rec_obj.accreditations.set(rec_data.get("accreditations", []))
+            rec_obj.updated_by = user
+            rec_obj.save()
 
-        # -----------------------------
-        # 4. SERVICE
-        # -----------------------------
+    # -----------------------------------
+    # 4. SERVICE (ONE TO ONE + M2M)
+    # -----------------------------------
         if "service" in data:
             service_data = data["service"]
             categories = service_data.pop("service_categories", [])
@@ -263,59 +263,59 @@ class ServiceProviderViewSet(ModelViewSet):
             svc.service_categories.set(categories)
             svc.save()
 
-        # -----------------------------
-        # 5. CHILD TABLES (REPLACE)
-        # -----------------------------
-        def sync_children(model, instance, rows, user):
-    
-            existing_qs = model.objects.filter(provider=instance)
-            existing_map = {obj.id: obj for obj in existing_qs}
+    # -----------------------------------
+    # 5. CHILD TABLE UPSERT LOGIC
+    # -----------------------------------
+        def sync_children(model, rows):
+            existing = model.objects.filter(provider=instance)
+            existing_map = {obj.id: obj for obj in existing}
             sent_ids = []
 
             for row in rows:
                 row_id = row.pop("id", None)
 
-            if row_id and row_id in existing_map:
-            # UPDATE
-                obj = existing_map[row_id]
-                for key, value in row.items():
-                    setattr(obj, key, value)
-                obj.updated_by = user
-                obj.save()
-                sent_ids.append(row_id)
+                if row_id and row_id in existing_map:
+                # UPDATE
+                    obj = existing_map[row_id]
+                    for field, value in row.items():
+                        setattr(obj, field, value)
+                    obj.updated_by = user
+                    obj.save()
+                    sent_ids.append(row_id)
+                else:
+                # CREATE
+                    obj = model.objects.create(
+                        provider=instance,
+                        created_by=user,
+                        updated_by=user,
+                        **row
+                    )
+                    sent_ids.append(obj.id)
 
-            else:
-            # CREATE
-                obj = model.objects.create(
-                    provider=instance,
-                    created_by=user,
-                    updated_by=user,
-                    **row
-            )
-                sent_ids.append(obj.id)
-
-    # DELETE removed rows
+        # DELETE REMOVED
             model.objects.filter(provider=instance).exclude(id__in=sent_ids).delete()
 
         if "spocs" in data:
-            sync_children(SPOC, instance, data["spocs"], user)
+            sync_children(SPOC, data["spocs"])
 
         if "department_contacts" in data:
-            sync_children(DepartmentContact, instance, data["department_contacts"], user)
+            sync_children(DepartmentContact, data["department_contacts"])
 
         if "radiologies" in data:
-            sync_children(RadiologyItem, instance, data["radiologies"], user)
+            sync_children(RadiologyItem, data["radiologies"])
 
         if "discounts" in data:
-            sync_children(ProviderDiscount, instance, data["discounts"], user)
+            sync_children(ProviderDiscount, data["discounts"])
 
         if "vouchers" in data:
-            sync_children(ProviderVoucher, instance, data["vouchers"], user)
-        # -----------------------------
-        # 6. RETURN UPDATED RESPONSE
-        # -----------------------------
+            sync_children(ProviderVoucher, data["vouchers"])
+
+    # -----------------------------------
+    # 6. RESPONSE
+    # -----------------------------------
         response_serializer = self.get_serializer(instance)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
 
 
 

@@ -155,15 +155,3 @@ class DepartmentTypeViewSet(ModelViewSet):
         serializer.save(updated_by=self.request.user)
 
 
-# DUMMY VIEWSET FOR TESTING PURPOSE ONLY
-
-class ClientViewSet(ModelViewSet):
-    queryset = Client.objects.all()
-    serializer_class = ClientSerializer
-    permission_classes = [IsAdminUser]
-    
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user, updated_by=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)

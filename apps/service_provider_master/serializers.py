@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 
 
+
 class BaseMasterSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["id", "name", "created_at" , "updated_at" , "created_by" , "updated_by" ]
@@ -66,8 +67,3 @@ class DepartmentTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = DepartmentType
 
-# DUMMY SERIALIZER FOR TESTING PURPOSE ONLY
-
-class ClientSerializer(BaseMasterSerializer):
-    class Meta(BaseMasterSerializer.Meta):
-        model = Client

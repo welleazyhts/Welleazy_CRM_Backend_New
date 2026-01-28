@@ -27,6 +27,9 @@ from apps.accounts.views import (
     AdminLoginAPIView,
     AdminLogoutAPIView,
 )
+from apps.master_management.urls import urlpatterns as master_management_urls
+from apps.service_provider_master.urls import urlpatterns as service_provider_master_urls
+from apps.service_provider.urls import urlpatterns as service_provider_urls
 
 
 from django.conf import settings
@@ -39,6 +42,12 @@ urlpatterns = [
     path("api/admin/logout/", AdminLogoutAPIView.as_view()),
 
     path('api/token/', TokenObtainPairView.as_view()),
+    path('api/token/refresh/', TokenRefreshView.as_view()), 
+
+    path('api/service_provider_master/', include(service_provider_master_urls)),   
+    path('api/', include(master_management_urls)),
+    path("api/", include(service_provider_urls)),
+
     path('api/token/refresh/', TokenRefreshView.as_view()),    
     
     path('api/master-management/', include('apps.master_management.urls')),

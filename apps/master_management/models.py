@@ -1,13 +1,16 @@
 from django.db import models
 from apps.core.models import BaseModel
 
-class MasterProduct(BaseModel):
-    PRODUCT_FOR_CHOICES = (
-        ('Physical', 'Physical'),
-        ('Consultation', 'Consultation'),
-    )
+class MasterProductFor(BaseModel):
     name = models.CharField(max_length=255, unique=True)
-    product_for = models.CharField(max_length=255, choices=PRODUCT_FOR_CHOICES)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+class MasterProduct(BaseModel):
+    name = models.CharField(max_length=255, unique=True)
+    product_for = models.ManyToManyField(MasterProductFor, related_name='products')
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -70,7 +73,7 @@ class DoctorQualification(BaseModel):
 
 class DoctorSpecialization(BaseModel):
     name = models.CharField(max_length=255, unique=True)
-    image = models.ImageField(upload_to='media/doctor_specializations/', blank=True, null=True)
+    image = models.ImageField(upload_to='doctor_specializations/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -188,7 +191,7 @@ class MasterSpecialtiesTest(BaseModel):
 
 class MasterUploadFormat(BaseModel):
     name = models.CharField(max_length=255, unique=True)
-    upload_format = models.FileField(upload_to='upload_formats/')
+    upload_format = models.FileField(upload_to='media/upload_formats/')
     
     def __str__(self):
         return self.name 

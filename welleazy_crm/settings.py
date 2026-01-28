@@ -56,6 +56,13 @@ INSTALLED_APPS = [
     'apps.service_provider',
 
     'apps.master_management',
+    'apps.client_masters',
+    'apps.client',
+    'apps.client_branch',
+    'apps.client_product_service',
+    'apps.client_customer',
+    'apps.client_customer_login',
+    'apps.sub_client',
     
     # Third-party apps
     'rest_framework',
@@ -151,6 +158,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])

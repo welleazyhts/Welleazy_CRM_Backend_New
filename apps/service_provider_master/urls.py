@@ -12,5 +12,9 @@ router.register("discount-services", DiscountServiceViewSet)
 router.register("voucher-discount-types", VoucherDiscountTypeViewSet)
 router.register("dc-unique-names", DCUniqueNameViewSet)
 router.register("payment-terms", PaymentTermViewSet)
+router.register("recognitions", RecognitionViewSet)
+router.register("accreditations", AccreditationViewSet)
+router.register("department", DepartmentTypeViewSet)
+router.register("client", ClientViewSet)  # Added client viewset for testing purposes
 
 urlpatterns = router.urls

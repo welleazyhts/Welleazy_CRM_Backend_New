@@ -78,6 +78,21 @@ class DepartmentType(BaseModel):
         return self.name
 
 
+class Recognition(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Accreditation(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
 
 #DUMMY MODELS TO BE DELETED LATER-----
 

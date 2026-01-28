@@ -28,6 +28,8 @@ from apps.accounts.views import (
     AdminLogoutAPIView,
 )
 from apps.master_management.urls import urlpatterns as master_management_urls
+from apps.service_provider_master.urls import urlpatterns as service_provider_master_urls
+from apps.service_provider.urls import urlpatterns as service_provider_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,8 +40,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()), 
 
-    path('api/service_provider_master/', include('apps.service_provider_master.urls')),   
-    path('api/token/refresh/', TokenRefreshView.as_view()),    
-    
+    path('api/service_provider_master/', include(service_provider_master_urls)),   
     path('api/', include(master_management_urls)),
+    path("api/", include(service_provider_urls)),
+
 ]

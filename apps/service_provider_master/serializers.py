@@ -4,7 +4,7 @@ from .models import *
 
 class BaseMasterSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ["id", "name"]
+        fields = ["id", "name", "created_at" , "updated_at" , "created_by" , "updated_by" ]
 
 
 class PartnershipTypeSerializer(BaseMasterSerializer):
@@ -52,3 +52,22 @@ class DCUniqueNameSerializer(BaseMasterSerializer):
 class PaymentTermSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = PaymentTerm
+
+class RecognitionSerializer(BaseMasterSerializer):
+    class Meta(BaseMasterSerializer.Meta):
+        model = Recognition
+
+class AccreditationSerializer(BaseMasterSerializer):
+    class Meta(BaseMasterSerializer.Meta):
+        model = Accreditation
+
+
+class DepartmentTypeSerializer(BaseMasterSerializer):
+    class Meta(BaseMasterSerializer.Meta):
+        model = DepartmentType
+
+# DUMMY SERIALIZER FOR TESTING PURPOSE ONLY
+
+class ClientSerializer(BaseMasterSerializer):
+    class Meta(BaseMasterSerializer.Meta):
+        model = Client

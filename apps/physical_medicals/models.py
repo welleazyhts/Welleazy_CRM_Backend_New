@@ -1,132 +1,183 @@
 from django.db import models
-from django.db import models
+from apps.core.models import BaseModel
 
+# ================= CLIENT & BRANCH =================
+from apps.client.models import Client
+from apps.client_branch.models import ClientBranch
+
+# ================= PHYSICAL MEDICAL MASTERS =================
+from apps.physical_medical_master.models import (
+    CaseReceivedMode,
+    CaseType,
+    PaymentType,
+    CaseFor,
+    PreferredVisitType,
+    CaseStatus,
+    CustomerType,
+    ServiceOffered,
+    Gender,
+    MedicalTest,
+    CustomerProfile,
+    DhocPaymentOption
+)
+
+# ================= MASTER MANAGEMENT =================
 from apps.master_management.models import (
-    MasterProduct,
     State,
     City,
-    ServiceMapping, 
+    MasterProduct,
     MasterGenericTest
 )
 
 
-class PhysicalMedicalCase(models.Model):
-    case_id = models.CharField(max_length=20, unique=True)
+# ====================================================
+# 1️⃣ PHYSICAL MEDICAL CASE (MAIN)
+# ====================================================
+class PhysicalMedicalCase(BaseModel):
 
-    case_entry_datetime = models.DateTimeField()
-    case_received_mode = models.CharField(max_length=50)
-    case_received_datetime = models.DateTimeField()
+    case_id = models.CharField(max_length=20, unique=True, editable=False)
 
-    welleazy_branch = models.CharField(max_length=100)
-    assigned_executive = models.CharField(max_length=100)
+    case_received_mode = models.ForeignKey(CaseReceivedMode, on_delete=models.SET_NULL, null=True)
+    case_received_datetime = models.DateTimeField(null=True, blank=True)
+    case_status = models.ForeignKey(CaseStatus, on_delete=models.SET_NULL, null=True)
+    
+    assigned_executive = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.case_id:
+            self.case_id = f"WX{PhysicalMedicalCase.objects.count()+1:05d}"
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = "physical_medicals_physicalmedicalcase"
 
     def __str__(self):
         return self.case_id
-class PhysicalMedicalClientDetail(models.Model):
+
+
+# ====================================================
+# 2️⃣ CLIENT DETAILS
+# ====================================================
+class PhysicalMedicalClientDetail(BaseModel):
+
     case = models.OneToOneField(
         PhysicalMedicalCase,
         on_delete=models.CASCADE,
         related_name="client_detail"
     )
 
-    client_name = models.CharField(max_length=255)
-    branch_zone = models.CharField(max_length=100, blank=True, null=True)
-    branch_name = models.CharField(max_length=100)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client_branch = models.ForeignKey(ClientBranch, on_delete=models.CASCADE)
 
-    customer_type = models.CharField(max_length=20)  # Employee / Candidate
+    customer_type = models.ForeignKey(CustomerType, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(MasterProduct, on_delete=models.SET_NULL, null=True)
+    service_offered = models.ForeignKey(ServiceOffered, on_delete=models.SET_NULL, null=True)
 
-    product = models.ForeignKey(
-        MasterProduct,
-        on_delete=models.PROTECT,
-        related_name="physical_medical_clients"
-    )
-    services_offered = models.ForeignKey(
-        ServiceMapping,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="physical_medical_services"
-    )
+    received_by_name = models.CharField(max_length=255, blank=True)
+    received_mobile = models.CharField(max_length=15, blank=True)
+    received_email = models.EmailField(blank=True)
+    department = models.CharField(max_length=255, blank=True)
 
-    received_by = models.CharField(max_length=100, blank=True, null=True)
-    mobile_number = models.CharField(max_length=15, blank=True, null=True)
-    email_id = models.EmailField(blank=True, null=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
-class PhysicalMedicalCustomerDetail(models.Model):
+    class Meta:
+        db_table = "physical_medicals_physicalmedicalclientdetail"
+
+
+# ====================================================
+# 3️⃣ CUSTOMER DETAILS
+# ====================================================
+class PhysicalMedicalCustomerDetail(BaseModel):
+
     case = models.OneToOneField(
         PhysicalMedicalCase,
         on_delete=models.CASCADE,
         related_name="customer_detail"
     )
 
-    customer_id = models.CharField(max_length=20)
+    customer_id = models.CharField(max_length=20, unique=True, editable=False)
     customer_name = models.CharField(max_length=255)
-
     mobile_number = models.CharField(max_length=15)
-    alternate_number = models.CharField(max_length=15, blank=True, null=True)
+    alternate_number = models.CharField(max_length=15, blank=True)
 
-    gender = models.CharField(max_length=10)
-    email_id = models.EmailField()
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True)
+    email_id = models.EmailField(blank=True)
 
-    state = models.ForeignKey(State,on_delete=models.PROTECT,related_name="physical_medical_cases")
-    
-    city = models.ForeignKey(
-        City,
-        on_delete=models.PROTECT,
-        related_name="physical_medical_cases"
-    )
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
+
+    pincode = models.CharField(max_length=10)
+    address = models.TextField(blank=True)
+    area_locality = models.CharField(max_length=255, blank=True)
+    landmark = models.CharField(max_length=255, blank=True)
+
+    date_of_birth = models.DateField(null=True, blank=True)
+    geo_location = models.CharField(max_length=255, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.customer_id:
+            self.customer_id = f"EMP{PhysicalMedicalCustomerDetail.objects.count()+1:08d}"
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = "physical_medicals_physicalmedicalcustomerdetail"
 
 
-    address = models.TextField()
-    area = models.CharField(max_length=100)
-    landmark = models.CharField(max_length=100)
-    pincode = models.CharField(max_length=100)
-    date_of_birth = models.DateField(blank=True, null=True)
-    geo_location = models.CharField(max_length=255, blank=True, null=True)
-class PhysicalMedicalCaseDetail(models.Model):
+# ====================================================
+# 4️⃣ CASE DETAILS
+# ====================================================
+class PhysicalMedicalCaseDetail(BaseModel):
+
     case = models.OneToOneField(
         PhysicalMedicalCase,
         on_delete=models.CASCADE,
         related_name="case_detail"
     )
 
-    medical_test = models.CharField(max_length=100)
-    generic_test = models.ForeignKey(MasterGenericTest,on_delete=models.PROTECT,related_name="physical_medical_cases",
-        blank=True,
-        null=True
-    )
-
-    customer_profile = models.CharField(max_length=50)
-    customer_pay_amount = models.DecimalField(
-        max_digits=10, decimal_places=2
-    )
+    medical_test = models.ForeignKey(MedicalTest, on_delete=models.SET_NULL, null=True)
+    generic_test = models.ForeignKey(MasterGenericTest, on_delete=models.SET_NULL, null=True)
+    customer_profile = models.ForeignKey(CustomerProfile, on_delete=models.SET_NULL, null=True)
 
     application_no = models.CharField(max_length=50)
-    case_type = models.CharField(max_length=50)
-    payment_type = models.CharField(max_length=50)
-    case_for = models.CharField(max_length=50)
+    case_type = models.ForeignKey(CaseType, on_delete=models.SET_NULL, null=True)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, null=True)
+    case_for = models.ForeignKey(CaseFor, on_delete=models.SET_NULL, null=True)
 
-    dhoc_payment = models.CharField(
-    max_length=10,
-    null=True,
-    blank=True
-)
+    dhoc_payment = models.ForeignKey(DhocPaymentOption, on_delete=models.SET_NULL, null=True)
+    customer_pay_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    preferred_visit_type = models.CharField(
-        max_length=50, null=True, blank=True
+    preferred_visit_type = models.ForeignKey(PreferredVisitType, on_delete=models.SET_NULL, null=True)
+    preferred_appointment_datetime = models.DateTimeField(null=True, blank=True)
+
+    company_name = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = "physical_medicals_physicalmedicalcasedetail"
+
+
+# ====================================================
+# 5️⃣ DEPENDENTS (ADD CASE LIST)
+# ====================================================
+class PhysicalMedicalDependent(BaseModel):
+
+    case = models.ForeignKey(
+        PhysicalMedicalCase,
+        on_delete=models.CASCADE,
+        related_name="dependents"
     )
-    company_name = models.CharField(max_length=150, blank=True, null=True)
 
-    preferred_appointment_datetime = models.DateTimeField(
-        null=True, blank=True
-    )
+    case_for = models.ForeignKey(CaseFor, on_delete=models.SET_NULL, null=True)
+    dependent_name = models.CharField(max_length=255)
+    mobile_number = models.CharField(max_length=15)
 
-   
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True)
+    date_of_birth = models.DateField()
 
-    arrange_appointment = models.BooleanField(default=False)
+    address = models.TextField(blank=True)
+    medical_test = models.ForeignKey(MedicalTest, on_delete=models.SET_NULL, null=True)
 
-    case_status = models.CharField(max_length=100)
-    follow_up_date = models.DateField(null=True, blank=True)
-    remark = models.TextField(null=True, blank=True)
+    class Meta:
+        db_table = "physical_medicals_physicalmedicaldependent"

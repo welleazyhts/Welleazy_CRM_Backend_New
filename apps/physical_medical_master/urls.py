@@ -8,7 +8,6 @@ urlpatterns = [
     path("case-fors/", CaseForAPI.as_view()),
     path("preferred-visit-types/", PreferredVisitTypeAPI.as_view()),
     path("case-status/", CaseStatusAPI.as_view()),
-    path("branch-zones/", BranchZoneAPI.as_view()),
     path("customer-types/", CustomerTypeAPI.as_view()),
     path("service-offered/", ServiceOfferedAPI.as_view()),
     path("genders/", GenderAPI.as_view()),

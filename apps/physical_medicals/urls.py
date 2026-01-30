@@ -1,10 +1,11 @@
-from django.urls import path
-from .views import (
-    PhysicalMedicalAddCaseAPI,
-    PhysicalMedicalGetCaseAPI
+from rest_framework.routers import DefaultRouter
+from .views import PhysicalMedicalCaseViewSet
+
+router = DefaultRouter()
+router.register(
+    r"cases",
+    PhysicalMedicalCaseViewSet,
+    basename="physical-medical-case"
 )
 
-urlpatterns = [
-    path("add-case/", PhysicalMedicalAddCaseAPI.as_view()),
-    path("get-case/<str:case_id>/", PhysicalMedicalGetCaseAPI.as_view()),
-]
+urlpatterns = router.urls

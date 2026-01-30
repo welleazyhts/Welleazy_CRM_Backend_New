@@ -31,8 +31,6 @@ class CaseStatus(BaseMaster):
 
 
 # ---------- Client related ----------
-class BranchZone(BaseMaster): 
-    pass
 
 class CustomerType(BaseMaster): 
     pass
@@ -58,3 +56,9 @@ class CustomerProfile(BaseMaster):
 
 class DhocPaymentOption(BaseMaster): 
     pass
+class CaseForMaster(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name

@@ -54,13 +54,11 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.physical_medicals',
     'apps.master_management',
-<<<<<<< HEAD
     'apps.physical_medical_master',
     'apps.second_opinion_master',
     'apps.second_opinion',
     
 
-=======
     'apps.client_masters',
     'apps.client',
     'apps.client_branch',
@@ -68,7 +66,6 @@ INSTALLED_APPS = [
     'apps.client_customer',
     'apps.client_customer_login',
     'apps.sub_client',
->>>>>>> 666905a6698601174bc03b835c83b732f36c9a46
     
     # Third-party apps
     'rest_framework',

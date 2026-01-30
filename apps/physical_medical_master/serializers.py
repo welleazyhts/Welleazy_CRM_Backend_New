@@ -6,7 +6,6 @@ from .models import (
     CaseFor,
     PreferredVisitType,
     CaseStatus,
-    BranchZone,
     CustomerType,
     ServiceOffered,
     Gender,
@@ -48,12 +47,6 @@ class PreferredVisitTypeSerializer(BaseMasterSerializer):
 class CaseStatusSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = CaseStatus
-
-
-class BranchZoneSerializer(BaseMasterSerializer):
-    class Meta(BaseMasterSerializer.Meta):
-        model = BranchZone
-
 
 class CustomerTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):

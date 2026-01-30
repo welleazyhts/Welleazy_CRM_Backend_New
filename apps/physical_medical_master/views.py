@@ -9,7 +9,6 @@ from .models import (
     CaseFor,
     PreferredVisitType,
     CaseStatus,
-    BranchZone,
     CustomerType,
     ServiceOffered,
     Gender,
@@ -26,7 +25,6 @@ from .serializers import (
     CaseForSerializer,
     PreferredVisitTypeSerializer,
     CaseStatusSerializer,
-    BranchZoneSerializer,
     CustomerTypeSerializer,
     ServiceOfferedSerializer,
     GenderSerializer,
@@ -84,12 +82,6 @@ class PreferredVisitTypeAPI(BaseDropdownAPI):
 class CaseStatusAPI(BaseDropdownAPI):
     model = CaseStatus
     serializer_class = CaseStatusSerializer
-
-
-class BranchZoneAPI(BaseDropdownAPI):
-    model = BranchZone
-    serializer_class = BranchZoneSerializer
-
 
 class CustomerTypeAPI(BaseDropdownAPI):
     model = CustomerType

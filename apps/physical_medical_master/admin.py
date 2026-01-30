@@ -8,7 +8,6 @@ admin.site.register(CaseFor)
 admin.site.register(PreferredVisitType)
 admin.site.register(CaseStatus)
 
-admin.site.register(BranchZone)
 admin.site.register(CustomerType)
 admin.site.register(ServiceOffered)
 

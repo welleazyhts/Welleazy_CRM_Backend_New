@@ -11,9 +11,9 @@ from .models import (
     CaseStatus,
     CustomerType,
     ServiceOffered,
-    Gender,
+    
     MedicalTest,
-    GenericTest,
+   
     CustomerProfile,
     DhocPaymentOption,
 )
@@ -27,9 +27,9 @@ from .serializers import (
     CaseStatusSerializer,
     CustomerTypeSerializer,
     ServiceOfferedSerializer,
-    GenderSerializer,
+    
     MedicalTestSerializer,
-    GenericTestSerializer,
+
     CustomerProfileSerializer,
     DhocPaymentOptionSerializer,
 )
@@ -93,19 +93,13 @@ class ServiceOfferedAPI(BaseDropdownAPI):
     serializer_class = ServiceOfferedSerializer
 
 
-class GenderAPI(BaseDropdownAPI):
-    model = Gender
-    serializer_class = GenderSerializer
-
 
 class MedicalTestAPI(BaseDropdownAPI):
     model = MedicalTest
     serializer_class = MedicalTestSerializer
 
 
-class GenericTestAPI(BaseDropdownAPI):
-    model = GenericTest
-    serializer_class = GenericTestSerializer
+
 
 
 class CustomerProfileAPI(BaseDropdownAPI):

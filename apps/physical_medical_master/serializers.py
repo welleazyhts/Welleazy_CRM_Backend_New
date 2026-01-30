@@ -8,9 +8,9 @@ from .models import (
     CaseStatus,
     CustomerType,
     ServiceOffered,
-    Gender,
+    
     MedicalTest,
-    GenericTest,
+    
     CustomerProfile,
     DhocPaymentOption,
 )
@@ -58,9 +58,7 @@ class ServiceOfferedSerializer(BaseMasterSerializer):
         model = ServiceOffered
 
 
-class GenderSerializer(BaseMasterSerializer):
-    class Meta(BaseMasterSerializer.Meta):
-        model = Gender
+
 
 
 class MedicalTestSerializer(BaseMasterSerializer):
@@ -68,9 +66,6 @@ class MedicalTestSerializer(BaseMasterSerializer):
         model = MedicalTest
 
 
-class GenericTestSerializer(BaseMasterSerializer):
-    class Meta(BaseMasterSerializer.Meta):
-        model = GenericTest
 
 
 class CustomerProfileSerializer(BaseMasterSerializer):

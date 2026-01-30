@@ -1,5 +1,9 @@
 from rest_framework import serializers
 from .models import Client, ClientSPOC, ClientDocument, EmailNotificationType
+from apps.client_masters.models import (
+    BusinessType, CorporateType, Source, VisitType, PartnershipStatus,
+    ClientAgreementFrom, PaymentFrequency, Designation, WelleazyCRM, MemberRelationType
+)
 from apps.client_masters.serializers import (
     BusinessTypeSerializer, CorporateTypeSerializer, SourceSerializer,
     VisitTypeSerializer, PartnershipStatusSerializer, ClientAgreementFromSerializer,
@@ -78,64 +82,90 @@ class ClientSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ClientSPOCPayloadSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+
+    person_name = serializers.CharField(required=True)
+    mobile_no = serializers.CharField(required=True)
+    designation = serializers.PrimaryKeyRelatedField(
+        queryset=Designation.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    contact_no = serializers.CharField(required=False, allow_null=True)
+    email_id = serializers.EmailField(required=True)
+
+    receive_email_for = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=EmailNotificationType.objects.all(),
+        required=False
+    )
+
+class ClientDocumentPayloadSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+
 class ClientPayloadSerializer(serializers.Serializer):
+
     # Business Info
-    business_type = serializers.IntegerField(required=False, allow_null=True)
+    business_type = serializers.PrimaryKeyRelatedField(queryset=BusinessType.objects.all(), required=False, allow_null=True)
     corporate_code = serializers.CharField(required=False, allow_blank=True)
     corporate_name = serializers.CharField(required=False, allow_blank=True)
-    corporate_type = serializers.IntegerField(required=False, allow_null=True)
-    
+    corporate_type = serializers.PrimaryKeyRelatedField(queryset=CorporateType.objects.all(), required=False, allow_null=True)
+
     # Contact Info
     mobile_no = serializers.CharField(required=False, allow_blank=True)
     landline_no = serializers.CharField(required=False, allow_null=True)
     email_id = serializers.EmailField(required=False, allow_blank=True)
-    
+
     # Address Info
     head_office_address = serializers.CharField(required=False, allow_blank=True)
-    branch_office_addresses = serializers.CharField(required=False, allow_null=True)
-    
+    branch_office_address = serializers.CharField(required=False, allow_null=True)
+
     # Sales/Ops Info
-    source = serializers.IntegerField(required=False, allow_null=True)
+    source = serializers.PrimaryKeyRelatedField(queryset=Source.objects.all(), required=False, allow_null=True)
     referred_by = serializers.CharField(required=False, allow_null=True)
-    welleazy_crm = serializers.IntegerField(required=False, allow_null=True)
+    welleazy_crm = serializers.PrimaryKeyRelatedField(queryset=WelleazyCRM.objects.all(), required=False, allow_null=True)
     sales_manager = serializers.CharField(required=False, allow_blank=True)
     broker = serializers.CharField(required=False, allow_blank=True)
     ops_spoc = serializers.CharField(required=False, allow_blank=True)
-    
-    # Financial/Legal Info
+
+    # Financial / Legal
     service_charges = serializers.CharField(required=False, allow_null=True)
     pan_no = serializers.CharField(required=False, allow_null=True)
     gst_no = serializers.CharField(required=False, allow_null=True)
     home_visit_charges = serializers.CharField(required=False, allow_null=True)
     account_id = serializers.CharField(required=False, allow_null=True)
-    
-    # Other Info
     channel_partner_id = serializers.CharField(required=False, allow_null=True)
+
+    # Other
     website_url = serializers.URLField(required=False, allow_null=True)
     billing_email_address = serializers.EmailField(required=False, allow_null=True)
-    is_active = serializers.BooleanField(required=False, default=True)
-    
-    # Sponsorship Info
+    is_active = serializers.BooleanField(required=False)
+
+    # Sponsorship
     total_sponsored = serializers.CharField(required=False, allow_null=True)
     total_non_sponsored = serializers.CharField(required=False, allow_null=True)
-    is_dependent_sponsored = serializers.BooleanField(required=False, default=False)
-    members_sponsored = serializers.ListField(child=serializers.IntegerField(), required=False)
-    
-    case_registration_mail_auto_triggered = serializers.BooleanField(required=False, default=False)
-    separate_account = serializers.BooleanField(required=False, default=False)
-    
-    # Visit/Partnership
-    visit_type = serializers.IntegerField(required=False, allow_null=True)
-    corporate_partnership_status = serializers.IntegerField(required=False, allow_null=True)
-    
+    is_dependent_sponsored = serializers.BooleanField(required=False)
+    members_sponsored = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=MemberRelationType.objects.all(),
+        required=False
+    )
+
+    case_registration_mail_auto_triggered = serializers.BooleanField(required=False)
+    separate_access = serializers.BooleanField(required=False)
+
+    # Visit / Partnership
+    visit_type = serializers.PrimaryKeyRelatedField(queryset=VisitType.objects.all(), required=False, allow_null=True)
+    corporate_partnership_status = serializers.PrimaryKeyRelatedField(queryset=PartnershipStatus.objects.all(), required=False, allow_null=True)
+
     # Agreement
-    client_agreement_from = serializers.IntegerField(required=False, allow_null=True)
+    client_agreement_from = serializers.PrimaryKeyRelatedField(queryset=ClientAgreementFrom.objects.all(), required=False, allow_null=True)
     agreement_date = serializers.DateField(required=False, allow_null=True)
     expiry_date = serializers.DateField(required=False, allow_null=True)
-    frequency_of_payment = serializers.IntegerField(required=False, allow_null=True)
-    
-    # SPOCs
-    spocs = serializers.ListField(child=serializers.DictField(), required=False, allow_empty=True)
-    
-    # Document management
-    keep_documents = serializers.ListField(child=serializers.IntegerField(), required=False)
+    frequency_of_payment = serializers.PrimaryKeyRelatedField(queryset=PaymentFrequency.objects.all(), required=False, allow_null=True)
+
+    spocs = ClientSPOCPayloadSerializer(many=True, required=False)
+
+    documents = ClientDocumentPayloadSerializer(many=True, required=False)
+

@@ -99,12 +99,12 @@ class ClientViewSet(viewsets.ModelViewSet):
     def _save_client_fields(self, client, validated, request):
         simple_fields = [
             'corporate_code', 'corporate_name', 'mobile_no', 'landline_no', 'email_id',
-            'head_office_address', 'branch_office_addresses', 'referred_by',
+            'head_office_address',            'branch_office_address', 'referred_by',
             'sales_manager', 'broker', 'ops_spoc', 'service_charges', 'pan_no',
             'gst_no', 'home_visit_charges', 'account_id', 'channel_partner_id',
             'website_url', 'billing_email_address', 'is_active', 'total_sponsored',
             'total_non_sponsored', 'is_dependent_sponsored',
-            'case_registration_mail_auto_triggered', 'separate_account',
+            'case_registration_mail_auto_triggered', 'separate_access',
             'agreement_date', 'expiry_date'
         ]
         
@@ -112,24 +112,15 @@ class ClientViewSet(viewsets.ModelViewSet):
             if field in validated:
                 setattr(client, field, validated[field])
         
-        fk_fields = {
-            'business_type': 'BusinessType',
-            'corporate_type': 'CorporateType',
-            'source': 'Source',
-            'welleazy_crm': 'WelleazyCRM',
-            'visit_type': 'VisitType',
-            'corporate_partnership_status': 'PartnershipStatus',
-            'client_agreement_from': 'ClientAgreementFrom',
-            'frequency_of_payment': 'PaymentFrequency',
-        }
+        fk_fields = [
+            'business_type', 'corporate_type', 'source', 'welleazy_crm',
+            'visit_type', 'corporate_partnership_status', 'client_agreement_from',
+            'frequency_of_payment'
+        ]
         
-        for field, model_name in fk_fields.items():
+        for field in fk_fields:
             if field in validated:
-                field_id = validated[field]
-                if field_id is None:
-                    setattr(client, field, None)
-                else:
-                    setattr(client, f"{field}_id", field_id)
+                setattr(client, field, validated[field])
         
         # Handle image upload
         if 'background_image' in request.FILES:
@@ -142,38 +133,110 @@ class ClientViewSet(viewsets.ModelViewSet):
             client.members_sponsored.set(validated['members_sponsored'])
     
     def _save_spocs(self, client, validated):
-        if 'spocs' in validated:
-            for spoc_data in validated['spocs']:
-                ClientSPOC.objects.create(
+        if "spocs" not in validated:
+            return  # keep existing SPOCs untouched
+
+        spocs_data = validated["spocs"]
+        keep_ids = []
+
+        for spoc_data in spocs_data:
+            spoc_id = spoc_data.get("id")
+            receive_email_for = spoc_data.pop("receive_email_for", [])
+
+            if spoc_id:
+                # UPDATE existing
+                spoc = ClientSPOC.objects.filter(
+                    id=spoc_id,
+                    client=client
+                ).first()
+
+                if not spoc:
+                    raise ValidationError({
+                        "spocs": f"Invalid SPOC id {spoc_id} for this client"
+                    })
+
+                for field, value in spoc_data.items():
+                    setattr(spoc, field, value)
+
+                spoc.updated_by = client.updated_by
+                spoc.save()
+                keep_ids.append(spoc.id)
+
+            else:
+                # CREATE new
+                spoc = ClientSPOC.objects.create(
                     client=client,
-                    person_name=spoc_data.get('person_name'),
-                    mobile_no=spoc_data.get('mobile_no'),
-                    designation_id=spoc_data.get('designation'),
-                    contact_no=spoc_data.get('contact_no'),
-                    email_id=spoc_data.get('email_id'),
-                    receive_email_for=spoc_data.get('receive_email_for'),
                     created_by=client.created_by,
                     updated_by=client.updated_by,
+                    **spoc_data
                 )
+                keep_ids.append(spoc.id)
+
+            if receive_email_for is not None:
+                spoc.receive_email_for.set(receive_email_for)
+
+        # DELETE removed SPOCs
+        ClientSPOC.objects.filter(
+            client=client
+        ).exclude(id__in=keep_ids).delete()
+
     
     def _save_documents(self, client, validated, request):
-        if "keep_documents" in validated:
-            keep_ids = validated["keep_documents"]
-            ClientDocument.objects.filter(client=client).exclude(id__in=keep_ids).delete()
         files = (
-            request.FILES.getlist("documents") or 
-            request.FILES.getlist("files") or 
+            request.FILES.getlist("documents") or
+            request.FILES.getlist("files") or
             request.FILES.getlist("file") or
             request.FILES.getlist("upload_document")
         )
-        
+
+        # 🔹 CREATE: always save uploaded files
+        if not client.pk or self.action == "create":
+            for file in files:
+                ClientDocument.objects.create(
+                    client=client,
+                    file=file,
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
+            return
+
+        # 🔹 UPDATE: sync by id
+        if "documents" not in validated:
+            return  # keep existing untouched
+
+        keep_ids = []
+
+        for doc in validated["documents"]:
+            doc_id = doc.get("id")
+
+            if doc_id:
+                document = ClientDocument.objects.filter(
+                    id=doc_id,
+                    client=client
+                ).first()
+
+                if not document:
+                    raise ValidationError({
+                        "documents": f"Invalid document id {doc_id}"
+                    })
+
+                keep_ids.append(document.id)
+
+        # add new uploads
         for file in files:
-            ClientDocument.objects.create(
+            document = ClientDocument.objects.create(
                 client=client,
                 file=file,
                 created_by=request.user,
                 updated_by=request.user,
             )
+            keep_ids.append(document.id)
+
+        # delete removed
+        ClientDocument.objects.filter(
+            client=client
+        ).exclude(id__in=keep_ids).delete()
+
 
     # DOCUMENT MANAGEMENT ENDPOINTS
     

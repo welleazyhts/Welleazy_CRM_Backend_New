@@ -40,16 +40,11 @@ class ServiceOffered(BaseMaster):
 
 
 # ---------- Customer related ----------
-class Gender(BaseMaster): 
-    pass
-
 
 # ---------- Case detail related ----------
 class MedicalTest(BaseMaster): 
     pass
 
-class GenericTest(BaseMaster): 
-    pass
 
 class CustomerProfile(BaseMaster): 
     pass

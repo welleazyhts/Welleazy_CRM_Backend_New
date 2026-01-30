@@ -20,11 +20,3 @@ class ClientBranchSerializer(serializers.ModelSerializer):
             'is_active', 'created_at', 'updated_at',
             'created_by', 'created_by_name', 'updated_by', 'updated_by_name'
         ]
-
-    @transaction.atomic
-    def create(self, validated_data):
-        return super().create(validated_data)
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)

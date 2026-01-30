@@ -17,34 +17,41 @@ class ClientBranchViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        validated = serializer.validated_data
+
+        branch = ClientBranch(
+            created_by=request.user if request.user.is_authenticated else None,
+            updated_by=request.user if request.user.is_authenticated else None,
+        )
+
+        self._save_branch_fields(branch, validated)
+        branch.save()
+
         return Response(
             {
                 "message": "Client Branch created successfully",
-                "data": serializer.data
+                "data": ClientBranchSerializer(branch).data
             },
             status=status.HTTP_201_CREATED
         )
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user if self.request.user.is_authenticated else None)
-
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        branch = self.get_object()
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        validated = serializer.validated_data
+
+        branch.updated_by = request.user if request.user.is_authenticated else None
+        self._save_branch_fields(branch, validated)
+        branch.save()
+
         return Response(
             {
                 "message": "Client Branch updated successfully",
-                "data": serializer.data
+                "data": ClientBranchSerializer(branch).data
             },
             status=status.HTTP_200_OK
         )
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user if self.request.user.is_authenticated else None)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -53,3 +60,20 @@ class ClientBranchViewSet(viewsets.ModelViewSet):
             {"message": "Client Branch deleted successfully"},
             status=status.HTTP_200_OK
         )
+
+    # HELPER METHODS
+
+    def _save_branch_fields(self, branch, validated):
+        simple_fields = [   
+            'branch_name', 'spoc_name', 'mobile_no', 'email_id',
+            'address', 'is_active'
+        ]
+        
+        for field in simple_fields:
+            if field in validated:
+                setattr(branch, field, validated[field])
+        
+        fk_fields = ['client', 'branch_zone', 'state', 'city']
+        for field in fk_fields:
+            if field in validated:
+                setattr(branch, field, validated[field])

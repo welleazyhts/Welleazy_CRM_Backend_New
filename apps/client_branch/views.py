@@ -7,7 +7,9 @@ from .serializers import ClientBranchSerializer
 from .filters import ClientBranchFilter
 
 class ClientBranchViewSet(viewsets.ModelViewSet):
-    queryset = ClientBranch.objects.all().order_by('-created_at')
+    queryset = ClientBranch.objects.select_related(
+        'client', 'branch_zone', 'state', 'city', 'created_by', 'updated_by'
+    ).all().order_by('-created_at')
     serializer_class = ClientBranchSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]

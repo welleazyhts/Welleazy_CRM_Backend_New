@@ -9,7 +9,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 
 class SubClientViewSet(viewsets.ModelViewSet):
-    queryset = SubClient.objects.all().order_by("-created_at")
+    queryset = SubClient.objects.select_related(
+        'client', 'corporate_type', 'created_by', 'updated_by'
+    ).prefetch_related('spocs').all().order_by("-created_at")
     serializer_class = SubClientSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

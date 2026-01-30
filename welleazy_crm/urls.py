@@ -27,10 +27,6 @@ from apps.accounts.views import (
     AdminLoginAPIView,
     AdminLogoutAPIView,
 )
-from apps.master_management.urls import urlpatterns as master_management_urls
-from apps.service_provider_master.urls import urlpatterns as service_provider_master_urls
-from apps.service_provider.urls import urlpatterns as service_provider_urls
-
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -43,12 +39,6 @@ urlpatterns = [
 
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()), 
-
-    path('api/service_provider_master/', include(service_provider_master_urls)),   
-    path('api/', include(master_management_urls)),
-    path("api/", include(service_provider_urls)),
-
-    path('api/token/refresh/', TokenRefreshView.as_view()),    
     
     path('api/master-management/', include('apps.master_management.urls')),
     path('api/client-masters/', include('apps.client_masters.urls')),
@@ -58,6 +48,8 @@ urlpatterns = [
     path('api/client-customers/', include('apps.client_customer.urls')),
     path('api/client-customer-login/', include('apps.client_customer_login.urls')),
     path('api/sub-clients/', include('apps.sub_client.urls')),
+    path('api/service_provider_master/', include('apps.service_provider_master.urls')),   
+    path("api/", include('apps.service_provider.urls')),
     path('api/test_management_master/', include('apps.test_management_master.urls')),
     path('api/',include('apps.test_individual.urls')),
     path("api/", include("apps.test_package.urls")),

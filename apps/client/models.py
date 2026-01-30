@@ -6,9 +6,11 @@ from apps.client_masters.models import (
     ClientAgreementFrom, PaymentFrequency, Designation, WelleazyCRM, MemberRelationType,
     EmailNotificationType
 )
+from apps.master_management.models import MasterLoginType
 
 class Client(BaseModel):
     # Business Info
+    login_type = models.ForeignKey(MasterLoginType, on_delete=models.SET_NULL, null=True, blank=True)
     business_type = models.ForeignKey(BusinessType, on_delete=models.SET_NULL, null=True, blank=True)
     corporate_code = models.CharField(max_length=100, blank=True, null=True)
     corporate_name = models.CharField(max_length=255)
@@ -67,6 +69,13 @@ class Client(BaseModel):
     agreement_date = models.DateField(blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
     frequency_of_payment = models.ForeignKey(PaymentFrequency, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.login_type:
+            corporate_type = MasterLoginType.objects.filter(name__iexact="Corporate").first()
+            if corporate_type:
+                self.login_type = corporate_type
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.corporate_name

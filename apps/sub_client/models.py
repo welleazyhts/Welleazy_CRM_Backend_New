@@ -2,9 +2,11 @@ from django.db import models
 from apps.core.models import BaseModel
 from apps.client.models import Client
 from apps.client_masters.models import CorporateType, Source, Designation
+# from apps.master_management.models import MasterLoginType
 
 class SubClient(BaseModel):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='sub_clients')
+    # login_type = models.ForeignKey(MasterLoginType, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
     corporate_type = models.ForeignKey(CorporateType, on_delete=models.SET_NULL, null=True, blank=True)
     
@@ -22,6 +24,14 @@ class SubClient(BaseModel):
     lead_by = models.CharField(max_length=255, blank=True, null=True)
     
     is_active = models.BooleanField(default=True)
+
+    # def save(self, *args, **kwargs):
+    #     if not self.login_type:
+    #         # You might want to define "Sub-Corporate" in MasterLoginType
+    #         sub_corp_type = MasterLoginType.objects.filter(name__iexact="Sub-Corporate").first()
+    #         if sub_corp_type:
+    #             self.login_type = sub_corp_type
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} (Sub of {self.client.corporate_name})"

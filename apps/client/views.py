@@ -16,7 +16,13 @@ from .filters import ClientFilter
 
 class ClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser] 
-    queryset = Client.objects.all().order_by('-created_at')
+    queryset = Client.objects.select_related(
+        'business_type', 'corporate_type', 'source', 'welleazy_crm',
+        'visit_type', 'corporate_partnership_status', 'client_agreement_from',
+        'frequency_of_payment', 'created_by', 'updated_by'
+    ).prefetch_related(
+        'spocs', 'documents', 'members_sponsored'
+    ).all().order_by('-created_at')
     serializer_class = ClientSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 

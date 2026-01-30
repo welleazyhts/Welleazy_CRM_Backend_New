@@ -7,13 +7,12 @@ from django.db import models
 from django.db import models
 from apps.test_management_master.models import (
     PlanCategory,
-    CheckUpType,
-    Gender
+    CheckUpType
 )
 from apps.test_individual.models import IndividualTest
 from apps.core.models import BaseModel
 from apps.client.models import Client
-from apps.master_management.models import MasterVisitType , City
+from apps.master_management.models import MasterVisitType , City , MasterGender
 
 
 class TestPackage(BaseModel):
@@ -90,7 +89,7 @@ class TestPackage(BaseModel):
     max_age = models.PositiveIntegerField(null=True, blank=True)
 
     gender = models.ForeignKey(
-        Gender,
+        MasterGender,
         on_delete=models.SET_NULL,
         null=True
     )

@@ -38,6 +38,13 @@ urlpatterns = [
     path("api/admin/logout/", AdminLogoutAPIView.as_view()),
 
     path('api/token/', TokenObtainPairView.as_view()),
+    path('api/token/refresh/', TokenRefreshView.as_view()),
+
+    path("api/physical-medicals/", include("apps.physical_medicals.urls")), 
+    path("api/second-opinion/", include("apps.second_opinion.urls")),
+    path('api/second-opinion-master/',include('apps.second_opinion_master.urls')),
+    path("api/physical-medical-master/",include("apps.physical_medical_master.urls")),
+
     path('api/token/refresh/', TokenRefreshView.as_view()), 
     
     path('api/master-management/', include('apps.master_management.urls')),
@@ -53,6 +60,8 @@ urlpatterns = [
     path('api/test_management_master/', include('apps.test_management_master.urls')),
     path('api/',include('apps.test_individual.urls')),
     path("api/", include("apps.test_package.urls")),
+    path('api/doctor_master/', include('apps.doctor_master.urls')),
+    path('api/' , include('apps.doctor.urls')),
 
 ]
     

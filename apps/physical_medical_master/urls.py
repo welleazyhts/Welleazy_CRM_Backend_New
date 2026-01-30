@@ -10,9 +10,8 @@ urlpatterns = [
     path("case-status/", CaseStatusAPI.as_view()),
     path("customer-types/", CustomerTypeAPI.as_view()),
     path("service-offered/", ServiceOfferedAPI.as_view()),
-    path("genders/", GenderAPI.as_view()),
     path("medical-tests/", MedicalTestAPI.as_view()),
-    path("generic-tests/", GenericTestAPI.as_view()),
+    
     path("customer-profiles/", CustomerProfileAPI.as_view()),
     path("dhoc-payment-options/", DhocPaymentOptionAPI.as_view()),
 ]

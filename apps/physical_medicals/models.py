@@ -15,7 +15,7 @@ from apps.physical_medical_master.models import (
     CaseStatus,
     CustomerType,
     ServiceOffered,
-    Gender,
+    
     MedicalTest,
     CustomerProfile,
     DhocPaymentOption
@@ -26,7 +26,8 @@ from apps.master_management.models import (
     State,
     City,
     MasterProduct,
-    MasterGenericTest
+    MasterGenericTest,
+    MasterGender,
 )
 
 
@@ -103,7 +104,7 @@ class PhysicalMedicalCustomerDetail(BaseModel):
     mobile_number = models.CharField(max_length=15)
     alternate_number = models.CharField(max_length=15, blank=True)
 
-    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True)
+    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True)
     email_id = models.EmailField(blank=True)
 
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True)
@@ -173,7 +174,7 @@ class PhysicalMedicalDependent(BaseModel):
     dependent_name = models.CharField(max_length=255)
     mobile_number = models.CharField(max_length=15)
 
-    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True)
+    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True)
     date_of_birth = models.DateField()
 
     address = models.TextField(blank=True)

@@ -11,9 +11,8 @@ admin.site.register(CaseStatus)
 admin.site.register(CustomerType)
 admin.site.register(ServiceOffered)
 
-admin.site.register(Gender)
+
 
 admin.site.register(MedicalTest)
-admin.site.register(GenericTest)
 admin.site.register(CustomerProfile)
 admin.site.register(DhocPaymentOption)

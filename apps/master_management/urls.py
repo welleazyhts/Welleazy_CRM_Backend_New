@@ -9,7 +9,7 @@ from .views import (MasterProductViewSet, MasterProductForViewSet, MasterProduct
                     MasterMedicalSurgeryViewSet, MasterPharmacyPartnerViewSet,
                     MasterMERTypeViewSet, MasterVisitTypeViewSet, MasterGenericTestViewSet,
                     MasterSpecialtiesTestViewSet, MasterUploadFormatViewSet,
-                    MasterLoginTypeViewSet, MasterGenderViewSet, MasterRelationshipViewSet)
+                    MasterLoginTypeViewSet, MasterGenderViewSet, MasterRelationshipViewSet , DoctorLanguageViewSet)
 
 router = DefaultRouter()
 router.register(r'products', MasterProductViewSet)
@@ -38,6 +38,7 @@ router.register(r'upload-formats', MasterUploadFormatViewSet)
 router.register(r'login-types', MasterLoginTypeViewSet)
 router.register(r'genders', MasterGenderViewSet)
 router.register(r'relationships', MasterRelationshipViewSet)
+router.register(r'doctor-languages', DoctorLanguageViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

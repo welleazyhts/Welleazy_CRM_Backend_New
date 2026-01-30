@@ -4,7 +4,7 @@ from .models import (MasterProduct, MasterProductFor, MasterProductSubCategory, 
                     MasterTypeOfInsurance, MasterInsuranceCompany, MasterSpeciality,
                     MasterTypeOfProvider, MasterMedicalSurgeryType, MasterMedicalSurgery,
                     MasterPharmacyPartner, MasterMERType, MasterVisitType, MasterGenericTest,
-                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterGender, MasterRelationship)
+                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterGender, MasterRelationship , DoctorLanguage)
 
 class MasterProductForSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)
@@ -240,4 +240,14 @@ class MasterRelationshipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MasterRelationship
+        fields = '__all__'
+
+
+
+class DoctorLanguageSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
+
+    class Meta:
+        model = DoctorLanguage
         fields = '__all__'

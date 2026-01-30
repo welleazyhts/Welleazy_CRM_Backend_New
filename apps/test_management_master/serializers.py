@@ -24,8 +24,3 @@ class CheckUpTypeSerializer(serializers.ModelSerializer):
         model = CheckUpType
         fields = "__all__"
 
-
-class GenderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Gender
-        fields = "__all__"

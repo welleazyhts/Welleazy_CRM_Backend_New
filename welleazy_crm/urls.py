@@ -68,6 +68,8 @@ urlpatterns = [
     path('api/test_management_master/', include('apps.test_management_master.urls')),
     path('api/',include('apps.test_individual.urls')),
     path("api/", include("apps.test_package.urls")),
+    path('api/doctor_master/', include('apps.doctor_master.urls')),
+    path('api/' , include('apps.doctor.urls')),
 
 ]
     

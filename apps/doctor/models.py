@@ -56,7 +56,7 @@ def generate_service_id():
     return uuid.uuid4().hex[:6].upper()
 
 
-class DoctorServicePrice(models.Model):
+class DoctorServicePrice(BaseModel):
     service_id = models.CharField(
         max_length=20,
         unique=True,
@@ -88,7 +88,7 @@ SHIFT_CHOICES = [
 ]
 
 
-class DoctorAvailability(models.Model):
+class DoctorAvailability(BaseModel):
     doctor = models.ForeignKey(
         Doctor,
         on_delete=models.CASCADE,
@@ -105,7 +105,7 @@ class DoctorAvailability(models.Model):
 
 
 
-class DoctorDocument(models.Model):
+class DoctorDocument(BaseModel):
     doctor = models.ForeignKey(
         Doctor,
         on_delete=models.CASCADE,
@@ -116,7 +116,7 @@ class DoctorDocument(models.Model):
 
 
 
-class DoctorBankDetail(models.Model):
+class DoctorBankDetail(BaseModel):
     doctor = models.OneToOneField(Doctor, on_delete=models.CASCADE, related_name='bank')
     account_number = models.CharField(max_length=30)
     bank_name = models.CharField(max_length=100)

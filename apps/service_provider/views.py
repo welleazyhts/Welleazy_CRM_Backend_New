@@ -132,7 +132,7 @@ class ServiceProviderViewSet(ModelViewSet):
         discount=r.get("discount", 0),
         time_from=r.get("time_from"),
         time_to=r.get("time_to"),
-         created_by=request.user,
+        created_by=request.user,
         updated_by=request.user,
     )
 

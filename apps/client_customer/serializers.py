@@ -28,6 +28,7 @@ class ClientCustomerSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     state_name = serializers.CharField(source='state.name', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
+    gender_name = serializers.CharField(source='gender.name', read_only=True)
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)
     updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
     

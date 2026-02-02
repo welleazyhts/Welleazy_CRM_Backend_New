@@ -13,15 +13,23 @@ class ClientCustomerService:
         dependents_data = data.pop('dependents', [])
         services_data = data.pop('services', [])
 
+        fk_fields = ['client', 'branch', 'product', 'gender', 'state', 'city']
+        processed_data = {}
+        for k, v in data.items():
+            if k in fk_fields and isinstance(v, int):
+                processed_data[f"{k}_id"] = v
+            else:
+                processed_data[k] = v
+
         if instance:
             # Update existing instance
-            for attr, value in data.items():
+            for attr, value in processed_data.items():
                 setattr(instance, attr, value)
             instance.updated_by = user
             instance.save()
         else:
             # Create new instance
-            instance = ClientCustomer.objects.create(created_by=user, updated_by=user, **data)
+            instance = ClientCustomer.objects.create(created_by=user, updated_by=user, **processed_data)
 
         # Handle Many-to-Many services
         if services_data:

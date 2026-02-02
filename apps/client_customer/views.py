@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import ClientCustomer, ClientCustomerDependent
+from apps.master_management.models import MasterGender, MasterRelationship
+from apps.client.models import Client
+from apps.client_masters.models import BranchZone
 from apps.test_package.models import TestPackage
 from .serializers import ClientCustomerSerializer
 from .filters import ClientCustomerFilter
@@ -13,9 +16,10 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
     queryset = ClientCustomer.objects.all().order_by('-created_at')
     serializer_class = ClientCustomerSerializer
     permission_classes = [IsAdminUser]
-    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = ClientCustomerFilter
     search_fields = ['customer_name', 'member_id', 'email_id', 'mobile_no']
+    ordering_fields = ['customer_name', 'created_at', 'updated_at', 'member_id']
 
     def create(self, request, *args, **kwargs):
         service = ClientCustomerService()
@@ -112,6 +116,10 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
     def get_meta_data(self, request):
         data = {
             "blood_group_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomer.BLOOD_GROUP_CHOICES],
+            "gender_choices": [{"id": g.id, "name": g.name} for g in MasterGender.objects.all()],
+            "relationship_choices": [{"id": r.id, "name": r.name} for r in MasterRelationship.objects.all()],
+            "client_choices": [{"id": c.id, "name": c.corporate_name} for c in Client.objects.all()],
+            "branch_zone_choices": [{"id": bz.id, "name": bz.name} for bz in BranchZone.objects.all()],
             "address_type_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomer.ADDRESS_TYPE_CHOICES],
             "dependent_status_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomerDependent.STATUS_CHOICES],
             "marital_status_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomerDependent.MARITAL_STATUS_CHOICES],

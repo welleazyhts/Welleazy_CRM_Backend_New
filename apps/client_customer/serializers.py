@@ -7,6 +7,7 @@ from apps.client_branch.models import ClientBranch
 class ClientCustomerAddressSerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='state.name', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
+    relation_type_name = serializers.CharField(source='relation_type.name', read_only=True)
 
     class Meta:
         model = ClientCustomerAddress
@@ -35,8 +36,8 @@ class ClientCustomerSerializer(serializers.ModelSerializer):
     addresses = ClientCustomerAddressSerializer(many=True, read_only=True)
     dependents = ClientCustomerDependentSerializer(many=True, read_only=True)
     
-    # Custom fields for M2M details
     services_details = serializers.SerializerMethodField()
+    package_details = serializers.SerializerMethodField()
 
     class Meta:
         model = ClientCustomer
@@ -47,6 +48,12 @@ class ClientCustomerSerializer(serializers.ModelSerializer):
         return [
             {'id': service.id, 'name': service.name}
             for service in obj.services.all()
+        ]
+
+    def get_package_details(self, obj):
+        return [
+            {'id': package.id, 'name': package.package_name}
+            for package in obj.packages.all()
         ]
 
     def validate(self, data):

@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import ClientCustomer
+from .models import ClientCustomer, ClientCustomerDependent
+from apps.test_package.models import TestPackage
 from .serializers import ClientCustomerSerializer
 from .filters import ClientCustomerFilter
 from .services import ClientCustomerService
@@ -74,3 +75,46 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
                 pass
         
         return Response({"member_id": next_id}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='generate-dependent-ids')
+    def generate_dependent_ids(self, request):
+        customer_id = request.query_params.get('customer_id')
+        member_id = request.query_params.get('member_id')
+        employee_code = request.query_params.get('employee_code')
+        count = request.query_params.get('count')
+
+        # If customer_id is provided, fetch details from DB and auto-calculate next count
+        if customer_id:
+            try:
+                customer = ClientCustomer.objects.get(id=customer_id)
+                member_id = customer.member_id
+                employee_code = customer.employee_code
+                if not count:
+                    count = customer.dependents.count() + 1
+            except ClientCustomer.DoesNotExist:
+                return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Default count to 1 if not provided/calculated
+        try:
+            count = int(count) if count else 1
+        except ValueError:
+            count = 1
+
+        response_data = {
+            "dependent_member_id": f"{member_id}D{count}" if member_id else None,
+            "dependent_id": f"{employee_code}ID{count}" if employee_code else None,
+            "next_count": count
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='get-meta-data')
+    def get_meta_data(self, request):
+        data = {
+            "blood_group_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomer.BLOOD_GROUP_CHOICES],
+            "address_type_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomer.ADDRESS_TYPE_CHOICES],
+            "dependent_status_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomerDependent.STATUS_CHOICES],
+            "marital_status_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomerDependent.MARITAL_STATUS_CHOICES],
+            "package_choices": [{"id": p.id, "name": p.package_name} for p in TestPackage.objects.all()],
+        }
+        return Response(data, status=status.HTTP_200_OK)

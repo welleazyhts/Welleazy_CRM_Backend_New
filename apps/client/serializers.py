@@ -37,6 +37,7 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
+        read_only_fields = ['corporate_code']
 
     def create(self, validated_data):
         spocs_data = validated_data.pop('spocs', [])
@@ -108,7 +109,7 @@ class ClientPayloadSerializer(serializers.Serializer):
 
     # Business Info
     business_type = serializers.PrimaryKeyRelatedField(queryset=BusinessType.objects.all(), required=False, allow_null=True)
-    corporate_code = serializers.CharField(required=False, allow_blank=True)
+    corporate_code = serializers.CharField(required=False, allow_blank=True, read_only=True)
     corporate_name = serializers.CharField(required=False, allow_blank=True)
     corporate_type = serializers.PrimaryKeyRelatedField(queryset=CorporateType.objects.all(), required=False, allow_null=True)
 

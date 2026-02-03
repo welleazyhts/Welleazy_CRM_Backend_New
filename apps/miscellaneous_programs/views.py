@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 class MiscellaneousProgramCaseViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     queryset = MiscellaneousProgramCase.objects.select_related(
         'client', 'branch', 'employee', 'case_for', 
         'relationship_person', 'state', 'city', 'case_status',

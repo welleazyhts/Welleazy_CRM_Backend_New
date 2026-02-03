@@ -64,6 +64,7 @@ urlpatterns = [
     path('api/' , include('apps.doctor.urls')),
     path('api/' , include('apps.gympackage.urls')),
     path('api/other-services/', include('apps.other_services.urls')),
+    path('api/miscellaneous-programs/', include('apps.miscellaneous_programs.urls')),
 
 
 ]

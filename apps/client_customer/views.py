@@ -12,6 +12,7 @@ from .serializers import ClientCustomerSerializer
 from .filters import ClientCustomerFilter
 from .services import ClientCustomerService
 
+
 class ClientCustomerViewSet(viewsets.ModelViewSet):
     queryset = ClientCustomer.objects.all().order_by('-created_at')
     serializer_class = ClientCustomerSerializer

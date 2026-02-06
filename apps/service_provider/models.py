@@ -75,8 +75,10 @@ class ServiceProvider(BaseModel):
         ],
         default="No"
     )
+
+    corporate_companies = models.ManyToManyField(Client, related_name="corporate_providers",blank=True)
     
-    client_company = models.ManyToManyField(Client, blank=True)
+    client_company = models.ManyToManyField(Client, related_name="service_providers", blank=True)
 
     # ---------- BASIC DETAILS ----------
     center_name = models.CharField(max_length=255)

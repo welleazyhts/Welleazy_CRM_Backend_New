@@ -1,3 +1,5 @@
+
+from apps.client.models import  Client
 from rest_framework import serializers
 from .models import (
     ServiceProvider, SPOC, ProviderRecognition, ProviderManpower,
@@ -108,6 +110,7 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
     
 
     client_company_names = serializers.SerializerMethodField()
+    corporate_companies_names = serializers.SerializerMethodField()
     medical_specialties_names = serializers.SerializerMethodField()
     recognition_names = serializers.SerializerMethodField()
     accreditation_names = serializers.SerializerMethodField()
@@ -123,8 +126,16 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
     vouchers = ProviderVoucherSerializer(many=True, required=False)
     visit_type_name = serializers.SerializerMethodField()
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-
-    
+    client_company = serializers.PrimaryKeyRelatedField(
+        queryset=Client.objects.all(),
+        many=True,
+        required=False
+    )
+    corporate_companies = serializers.PrimaryKeyRelatedField(
+        queryset=Client.objects.all(),
+        many=True,
+        required=False
+    )
 
     class Meta:
         model = ServiceProvider
@@ -132,6 +143,10 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
 
     def get_client_company_names(self, obj):
         return list(obj.client_company.values_list("corporate_name", flat=True))
+    
+    def get_corporate_companies_names(self, obj):
+        return list(obj.corporate_companies.values_list("corporate_name", flat=True))
+
 
     def get_medical_specialties_names(self, obj):
         return list(obj.medical_specialties.values_list("name", flat=True))
@@ -148,6 +163,30 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
         if hasattr(obj, "recognition"):
             return list(obj.recognition.accreditations.values_list("name", flat=True))
         return []
+    
+    def validate(self, attrs):
+        corporate_group = attrs.get(
+            "corporate_group",
+            self.instance.corporate_group if self.instance else None
+        )
+
+        corporate_companies = attrs.get("corporate_companies")
+
+        # ✅ Rule for PAGE-1
+        if corporate_group == "Yes":
+            if not corporate_companies:
+                raise serializers.ValidationError({
+                    "corporate_companies": "Corporate Name is required when Corporate Group is Yes."
+                })
+
+        if corporate_group == "No":
+            if corporate_companies:
+                raise serializers.ValidationError({
+                    "corporate_companies": "Corporate Name must be empty when Corporate Group is No."
+                })
+
+        # ✅ client_company has NO dependency — always allowed
+        return attrs
 
 
 # DOCUMENT UPLOAD SERIALIZERS

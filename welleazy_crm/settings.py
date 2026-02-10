@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'apps.master_management',
     'apps.physical_medical_master',
     'apps.second_opinion',
+    'apps.second_opinion_master',
     
     'apps.client_masters',
     'apps.client',

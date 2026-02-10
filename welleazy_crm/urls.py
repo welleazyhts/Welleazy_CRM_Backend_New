@@ -42,12 +42,8 @@ urlpatterns = [
 
     # path("api/physical-medicals/", include("apps.physical_medicals.urls")), 
     path("api/second-opinion/", include("apps.second_opinion.urls")),
-    # path('api/second-opinion-master/',include('apps.second_opinion_master.urls')),
-    path("api/physical-medical-master/",include("apps.physical_medical_master.urls")),
     path('api/second-opinion-master/',include('apps.second_opinion_master.urls')),
     # path("api/physical-medical-master/",include("apps.physical_medical_master.urls")),
-
-    path('api/token/refresh/', TokenRefreshView.as_view()), 
     
     path('api/master-management/', include('apps.master_management.urls')),
     path('api/client-masters/', include('apps.client_masters.urls')),

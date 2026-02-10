@@ -7,9 +7,12 @@ from django.http import HttpResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import CareProgram , EyeDentalTreatment , MedicalCamp , CampCase
+
+from apps.client_customer.models import ClientCustomerDependent
+from apps.master_management.models import MasterRelationship
+from .models import CareProgram , EyeDentalTreatment , MedicalCamp , CampCase , CHP , TypeOfOHC , OHC , EyeTreatmentCase , DentalTreatmentCase
 from apps.test_individual.models import IndividualTest as Test
-from .serializers import CareProgramSerializer , EyeDentalTreatmentSerializer , MedicalCampSerializer , CampCaseSerializer
+from .serializers import CareProgramSerializer , EyeDentalTreatmentSerializer , MedicalCampSerializer , CampCaseSerializer , CHPSerializer, TypeOfOHCSerializer , OHCSerializer , EyeTreatmentCaseSerializer , DentalTreatmentCaseSerializer
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -300,3 +303,273 @@ class CampCaseViewSet(ModelViewSet):
             qs = qs.filter(camp__main_client__corporate_name__in=names)
 
         return qs
+    
+
+# CHP VIEWSET-----
+
+
+class CHPViewSet(ModelViewSet):
+    queryset = CHP.objects.select_related("package", "product" , "service")
+    serializer_class = CHPSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    # FLITERS---
+
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        
+        package = self.request.query_params.get("package")     
+        product = self.request.query_params.get("product")     
+        service = self.request.query_params.get("service")   
+        category = self.request.query_params.get("category")    
+        frequency = self.request.query_params.get("frequency")  
+
+        if package:
+            ids = [i.strip() for i in package.split(",") if i.strip()]
+            qs = qs.filter(package_id__in=ids)
+
+        if product:
+            ids = [i.strip() for i in product.split(",") if i.strip()]
+            qs = qs.filter(product_id__in=ids)
+
+        if service:
+            ids = [i.strip() for i in service.split(",") if i.strip()]
+            qs = qs.filter(service_id__in=ids)
+
+        if category:
+            values = [v.strip() for v in category.split(",") if v.strip()]
+            qs = qs.filter(category__in=values)
+
+        if frequency:
+            values = [v.strip() for v in frequency.split(",") if v.strip()]
+            qs = qs.filter(frequency__in=values)
+
+        return qs
+    
+
+# OHC  MASTER VIEWSET-----
+
+class TypeOfOHCViewSet(ModelViewSet):
+    queryset = TypeOfOHC.objects.all()
+    serializer_class = TypeOfOHCSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+
+# OHC MAIN VIEWSET-----
+
+class OHCViewSet(ModelViewSet):
+    queryset = OHC.objects.select_related("type_of_ohc", "client", "doctor")
+    serializer_class = OHCSerializer
+    permission_classes = [IsAdminUser]
+
+
+    def _get_doctor_qualification_text(self, doctor):
+       
+        qs = doctor.qualifications.all()
+        names = [q.name for q in qs]  
+        return ", ".join(names)
+
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        doctor = data.get("doctor")
+
+        # ✅ Auto-fetch qualification from Doctor
+        qualification = self._get_doctor_qualification_text(doctor)
+
+        ohc = OHC.objects.create(
+            type_of_ohc=data.get("type_of_ohc"),
+            client=data.get("client"),
+            doctor=doctor,
+
+            corporate_requirements=data.get("corporate_requirements", ""),
+            crm_name=data.get("crm_name", ""),
+            corporate_address=data.get("corporate_address", ""),
+
+            spoc_name=data.get("spoc_name", ""),
+            spoc_email=data.get("spoc_email", ""),
+            spoc_mobile=data.get("spoc_mobile", ""),
+
+            service_start_date=data.get("service_start_date"),
+            agreement_date=data.get("agreement_date"),
+            relationship_end_date=data.get("relationship_end_date"),
+
+            agreement_upload=data.get("agreement_upload"),
+
+            client_bill_amount=data.get("client_bill_amount"),
+            service_provider_cost=data.get("service_provider_cost"),
+
+            doctor_qualifications=qualification,                 # 🔥 auto-filled
+            doctor_certificate_link=data.get("doctor_certificate_link", ""),  # from frontend
+
+            remarks=data.get("remarks", ""),
+            created_by=request.user,
+            updated_by=request.user,
+        )
+
+        out = self.get_serializer(ohc)
+        return response(out.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        doctor = data.get("doctor", instance.doctor)
+
+        # If doctor changed, refresh qualification
+        qualification = self._get_doctor_qualification_text(doctor)
+
+        # Update fields
+        for attr, value in data.items():
+            setattr(instance, attr, value)
+
+        instance.doctor = doctor
+        instance.doctor_qualifications = qualification  # 🔥 always sync from Doctor
+        instance.updated_by = request.user
+        instance.save()
+
+        out = self.get_serializer(instance)
+        return response(out.data, status=status.HTTP_200_OK)
+
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        type_of_ohc = self.request.query_params.get("type_of_ohc")  
+        client = self.request.query_params.get("client")            
+        doctor = self.request.query_params.get("doctor")           
+
+        if type_of_ohc:
+            ids = [i.strip() for i in type_of_ohc.split(",") if i.strip()]
+            qs = qs.filter(type_of_ohc_id__in=ids)
+
+        if client:
+            ids = [i.strip() for i in client.split(",") if i.strip()]
+            qs = qs.filter(client_id__in=ids)
+
+        if doctor:
+            ids = [i.strip() for i in doctor.split(",") if i.strip()]
+            qs = qs.filter(doctor_id__in=ids)
+
+        return qs
+    
+
+# EYE PROCEDURE CASE VIEWSET-----
+
+
+class EyeTreatmentCaseViewSet(ModelViewSet):
+    queryset = EyeTreatmentCase.objects.all().order_by('-id')
+    serializer_class = EyeTreatmentCaseSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+    @action(detail=False, methods=['get'], url_path='relationship-persons')
+    def relationship_persons(self, request):
+        employee_id = request.query_params.get('employee_id')
+        case_for_id = request.query_params.get('case_for_id')
+
+        relationship = MasterRelationship.objects.get(id=case_for_id)
+
+        # SELF → no dropdown
+        if relationship.name.lower() == 'self':
+            return response([])
+
+        dependants = ClientCustomerDependent.objects.filter(
+            customer_id=employee_id,
+            relationship_id=case_for_id
+        )
+
+        return response([
+            {
+                "id": d.id,
+                "name": d.name
+            } for d in dependants
+        ])
+    
+
+    @action(detail=False, methods=['get'], url_path='eye-treatments')
+    def eye_treatments(self, request):
+        qs = EyeDentalTreatment.objects.filter(
+            treatment_type='Eye',
+            is_active=True
+        ).order_by('name')
+
+        return response([
+            {"id": t.id, "name": t.name}
+            for t in qs
+        ])
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+
+# DENTAL PROCEDURE CASE VIEWSET-----
+
+
+
+class DentalTreatmentCaseViewSet(ModelViewSet):
+    queryset = DentalTreatmentCase.objects.all().order_by('-id')
+    serializer_class = DentalTreatmentCaseSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='relationship-persons')
+    def relationship_persons(self, request):
+        employee_id = request.query_params.get('employee_id')
+        case_for_id = request.query_params.get('case_for_id')
+
+        if not employee_id or not case_for_id:
+            return response([])
+
+        relationship = MasterRelationship.objects.get(id=case_for_id)
+        if relationship.name.lower() == 'self':
+            return response([])
+
+        dependants = ClientCustomerDependent.objects.filter(
+            customer_id=employee_id,
+            relationship_id=case_for_id
+        )
+
+        return response([{"id": d.id, "name": d.name} for d in dependants])
+
+    @action(detail=False, methods=['get'], url_path='dental-treatments')
+    def dental_treatments(self, request):
+        qs = EyeDentalTreatment.objects.filter(
+            treatment_type='Dental',
+            is_active=True
+        ).order_by('name')
+
+        return response([{"id": t.id, "name": t.name} for t in qs])
+
+
+   

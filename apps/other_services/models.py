@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
@@ -8,8 +9,12 @@ from apps.test_package.models import TestPackage
 from apps.test_individual.models import IndividualTest as Test
 from apps.core.models import BaseModel
 from django.utils import timezone
-from apps.master_management.models import State, City , MasterGender , CaseStatus
+from apps.master_management.models import State, City , MasterGender , CaseStatus , MasterProduct , MasterProductSubCategory , MasterRelationship
 from apps.service_provider.models import ServiceProvider
+from apps.doctor.models import Doctor
+from apps.client_branch.models import ClientBranch
+from apps.client_customer.models import ClientCustomer , ClientCustomerDependent
+
 
 
 class CareProgram(BaseModel):
@@ -177,6 +182,223 @@ class CampCase(BaseModel):
             self.customer_id = f"CNR{num:02d}"
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.case_id
+
+
+# COMPREHENSIVE HEALTH PLANS------
+
+
+class CHP(BaseModel):
+    CATEGORY_CHOICES = (
+        ("NA", "NA"),
+        ("Monthly", "Monthly"),
+        ("Quarterly", "Quarterly"),
+        ("Half Yearly", "Half Yearly"),
+        ("Annually", "Annually"),
+    )
+
+    FREQUENCY_CHOICES = (
+        ("NA", "NA"),
+        ("Monthly", "Monthly"),
+        ("Quarterly", "Quarterly"),
+        ("Half Yearly", "Half Yearly"),
+        ("Annually", "Annually"),
+    )
+
+    package = models.ForeignKey(TestPackage, on_delete=models.PROTECT)
+
+    # These two are choices now
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="NA")
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default="NA")
+
+    product = models.ForeignKey(MasterProduct, on_delete=models.PROTECT)  
+    service = models.ForeignKey(MasterProductSubCategory, on_delete=models.PROTECT) 
+
+    limitation = models.CharField(max_length=255, blank=True)
+    normal_price = models.DecimalField(max_digits=10, decimal_places=2)
+    corporate_price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+
+    def __str__(self):
+        return f"{self.package} - {self.product}"
+
+
+
+# OHC MASTER TABLE-----
+
+
+class TypeOfOHC(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+
+# OHC MAIN TABLE------
+
+
+class OHC(BaseModel):
+    type_of_ohc = models.ForeignKey(TypeOfOHC, on_delete=models.PROTECT)
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
+
+    corporate_requirements = models.TextField(blank=True)
+    crm_name = models.CharField(max_length=255, blank=True)
+
+    corporate_address = models.TextField(blank=True)
+
+    spoc_name = models.CharField(max_length=255, blank=True)
+    spoc_email = models.EmailField(blank=True)
+    spoc_mobile = models.CharField(max_length=20, blank=True)
+
+    # Date + Time
+    service_start_date = models.DateTimeField(null=True, blank=True)
+    agreement_date = models.DateTimeField(null=True, blank=True)
+    relationship_end_date = models.DateTimeField(null=True, blank=True)
+
+    agreement_upload = models.FileField(upload_to="ohc_agreements/", null=True, blank=True)
+
+    client_bill_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    service_provider_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    # These two:
+    doctor_qualifications = models.CharField(max_length=255, blank=True)
+    doctor_certificate_link = models.URLField(blank=True)
+
+    remarks = models.TextField(blank=True)
+
+   
+
+    def __str__(self):
+        return f"{self.client} - {self.type_of_ohc}"
+
+
+# EYE PROCEDURE MODULE------
+
+
+class EyeTreatmentCase(BaseModel):
+
+    case_id = models.CharField(max_length=20, unique=True, editable=False)
+
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    branch = models.ForeignKey(ClientBranch, on_delete=models.PROTECT)
+
+    employee = models.ForeignKey(
+        ClientCustomer,
+        on_delete=models.PROTECT,
+        related_name='eye_treatment_cases'
+    )
+
+    case_for = models.ForeignKey(
+        MasterRelationship,
+        on_delete=models.PROTECT
+    )
+
+    # Store dependant only when not SELF
+    relationship_person = models.ForeignKey(
+        ClientCustomerDependent,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='eye_treatment_cases'
+    )
+
+    # Single, stored name (auto-prefilled but editable)
+    customer_name = models.CharField(max_length=255)
+
+    mobile_number = models.CharField(max_length=15)
+    email_id = models.EmailField()
+
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
+
+    address = models.TextField(blank=True, null=True)
+
+    eye_treatment = models.ForeignKey(
+        EyeDentalTreatment,
+        on_delete=models.PROTECT
+    )
+
+    case_status = models.ForeignKey(
+        CaseStatus,
+        on_delete=models.PROTECT
+    )
+
+    comment = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+   
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new and not self.case_id:
+            self.case_id = f"WZCP{self.pk:06d}"
+            super().save(update_fields=['case_id'])
+
+
+# DENTAL PROCEDURE MODULE------
+
+
+
+class DentalTreatmentCase(BaseModel):
+    case_id = models.CharField(max_length=20, unique=True, editable=False)
+
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    branch = models.ForeignKey(ClientBranch, on_delete=models.PROTECT)
+
+    employee = models.ForeignKey(
+        ClientCustomer,
+        on_delete=models.PROTECT,
+        related_name='dental_treatment_cases'
+    )
+
+    case_for = models.ForeignKey(MasterRelationship, on_delete=models.PROTECT)
+
+    # Only when not SELF
+    relationship_person = models.ForeignKey(
+        ClientCustomerDependent,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='dental_treatment_cases'
+    )
+
+    customer_name = models.CharField(max_length=255)
+
+    mobile_number = models.CharField(max_length=15)
+    email_id = models.EmailField()
+
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
+
+    address = models.TextField(blank=True, null=True)
+
+    # Same master table as Eye, but filtered by type in serializer/view
+    dental_treatment = models.ForeignKey(EyeDentalTreatment, on_delete=models.PROTECT)
+
+    case_status = models.ForeignKey(CaseStatus, on_delete=models.PROTECT)
+
+    comment = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+
+ 
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new and not self.case_id:
+            self.case_id = f"WZCP{self.pk:06d}"
+            super().save(update_fields=['case_id'])
 
     def __str__(self):
         return self.case_id

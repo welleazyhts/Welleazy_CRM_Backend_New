@@ -16,12 +16,14 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
 from django.db.models import Q
 from django.utils.dateparse import parse_date
+from rest_framework.permissions import IsAdminUser
 
 
 
 class CareProgramCaseViewSet(ModelViewSet):
     queryset = CareProgramCase.objects.all().order_by('-id')
     serializer_class = CareProgramCaseSerializer
+    permission_classes = [IsAdminUser]
 
     # -----------------------------
     # CUSTOMER NAME DROPDOWN
@@ -65,6 +67,7 @@ class CareProgramCaseViewSet(ModelViewSet):
 
 class OpenCareProgramCaseViewSet(ReadOnlyModelViewSet):
     serializer_class = CareProgramCaseSerializer
+    permission_classes = [IsAdminUser]
 
     def get_queryset(self):
         qs = CareProgramCase.objects.all()
@@ -132,6 +135,7 @@ class OpenCareProgramCaseViewSet(ReadOnlyModelViewSet):
 
 class ClosedCareProgramCaseViewSet(ReadOnlyModelViewSet):
     serializer_class = CareProgramCaseSerializer
+    permission_classes = [IsAdminUser]
 
     def get_queryset(self):
         qs = CareProgramCase.objects.all()

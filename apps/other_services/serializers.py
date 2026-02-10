@@ -1,7 +1,9 @@
 from http import client
 from rest_framework import serializers
-from .models import CareProgram , EyeDentalTreatment , MedicalCamp , CampCase
+from .models import OHC, CareProgram , EyeDentalTreatment , MedicalCamp , CampCase , CHP, TypeOfOHC , EyeTreatmentCase , DentalTreatmentCase
 from apps.test_individual.models import IndividualTest as Test
+from apps.master_management.models import City, ServiceMapping , State
+from apps.client_customer.models import ClientCustomer, ClientCustomerDependent
 
 class CareProgramSerializer(serializers.ModelSerializer):
     class Meta:
@@ -133,3 +135,266 @@ class CampCaseSerializer(serializers.ModelSerializer):
         model = CampCase
         fields = "__all__"
         read_only_fields = ("case_id", "customer_id", "created_at")
+
+
+# COMPREHENSIVE HEALTH PLANS SERIALIZER-----
+
+class CHPSerializer(serializers.ModelSerializer):
+    package_name = serializers.CharField(source="package.package_name", read_only=True)
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    service_name = serializers.CharField(source="service.name", read_only=True)
+
+    class Meta:
+        model = CHP
+        fields = "__all__"
+
+    def validate(self, attrs):
+        product = attrs.get("product")
+        service = attrs.get("service")
+
+        # ✅ Check mapping: product must have this service in sub_products
+        mapping = ServiceMapping.objects.filter(product=product).first()
+
+        if not mapping:
+            raise serializers.ValidationError("No service mapping found for this product.")
+
+        if not mapping.sub_products.filter(id=service.id).exists():
+            raise serializers.ValidationError(
+                "Selected service does not belong to the selected product."
+            )
+
+        return attrs
+    
+
+# OHC MASTER SERIALIZERS-------
+
+class TypeOfOHCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeOfOHC
+        fields = "__all__"
+
+# OHC MAIN SERIALIZERS-------
+
+
+class OHCSerializer(serializers.ModelSerializer):
+    type_of_ohc_name = serializers.CharField(source="type_of_ohc.name", read_only=True)
+    client_name = serializers.CharField(source="client.corporate_name", read_only=True)  
+    doctor_name = serializers.CharField(source="doctor.doctor_name", read_only=True)  
+    
+    created_by_name = serializers.CharField(source="created_by.name", read_only=True)
+    updated_by_name = serializers.CharField(source="updated_by.name", read_only=True)          
+
+    class Meta:
+        model = OHC
+        fields = "__all__"
+        read_only_fields = ("doctor_qualifications",)
+
+
+# EYE PROCEDURE SERIALIZER-------
+
+
+class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
+
+    relationship_person_id = serializers.IntegerField(
+        write_only=True,
+        required=False
+    )
+    relationship_person_name = serializers.CharField(source='relationship_person.name', read_only=True)
+    client_name = serializers.CharField(source='client.corporate_name', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    employee_name = serializers.CharField(source='employee.corporate_name', read_only=True)
+    eye_treatment_name = serializers.CharField(source='eye_treatment.name', read_only=True)
+    case_status_name = serializers.CharField(source='case_status.name', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    state_name = serializers.CharField(source='state.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
+    case_for_name = serializers.CharField(source='case_for.name', read_only=True)
+
+    customer_name = serializers.CharField(required=False)
+    mobile_number = serializers.CharField(required=False)
+    email_id = serializers.EmailField(required=False)
+    address = serializers.CharField(required=False, allow_blank=True)
+    state = serializers.PrimaryKeyRelatedField(
+        queryset=State.objects.all(),
+        required=False
+    )
+    city = serializers.PrimaryKeyRelatedField(
+        queryset=City.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = EyeTreatmentCase
+        fields = '__all__'
+        read_only_fields = ['case_id','created_at']
+
+    def validate_eye_treatment(self, value):
+       
+        if value.treatment_type != 'Eye':
+            raise serializers.ValidationError(
+                "Only Eye treatments are allowed in Eye Treatment Case."
+            )
+        return value
+
+    def validate(self, data):
+        case_for = data['case_for']
+        employee = data['employee']
+        initial=self.initial_data
+
+        # -------------------
+        # SELF CASE
+        # -------------------
+        if case_for.name.lower() == 'self':
+            data['relationship_person'] = None
+            if 'customer_name' not in initial:
+                data['customer_name'] = employee.customer_name
+
+            # editable fields with fallback
+                data['mobile_number'] = initial.get('mobile_number', employee.mobile_no)
+                data['email_id'] = initial.get('email_id', employee.email_id)
+                data['address'] = initial.get('address', employee.area_locality)
+            if 'state' not in initial:
+                data['state'] = employee.state
+            else:
+                data['state'] = State.objects.get(id=initial['state'])
+
+            if 'city' not in initial:
+                data['city'] = employee.city
+            else:
+                data['city'] = City.objects.get(id=initial['city'])
+
+        # -------------------
+        # RELATION CASE
+        # -------------------
+        else:
+            relationship_person_id = initial.get('relationship_person_id')
+
+            if not relationship_person_id:
+                raise serializers.ValidationError({
+                    "relationship_person_id": "Relationship person is required."
+                })
+
+            dependant = ClientCustomerDependent.objects.filter(
+                id=relationship_person_id,
+                customer=employee,
+                relationship=case_for
+            ).first()
+
+            if not dependant:
+                raise serializers.ValidationError(
+                    "Invalid relationship person selected."
+                )
+
+            if 'customer_name' not in initial:
+                data['customer_name'] = dependant.name
+
+            required_fields=[
+                'mobile_number',
+                'email_id',
+                'state',
+                'city',
+                'address'
+            ]
+
+            for field in required_fields:
+                if field not in initial:
+                    raise serializers.ValidationError({
+                        field: "This field is required for dependant case."
+                    })
+                
+
+            data['state'] = State.objects.get(id=initial['state'])
+            data['city'] = City.objects.get(id=initial['city'])
+
+        return data
+    
+
+# DENTAL PROCEDURE SERIALIZER-------
+
+
+class DentalTreatmentCaseSerializer(serializers.ModelSerializer):
+    relationship_person_id = serializers.IntegerField(write_only=True, required=False)
+    relationship_person_name = serializers.CharField(source='relationship_person.name', read_only=True)
+    client_name = serializers.CharField(source='client.corporate_name', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    employee_name = serializers.CharField(source='employee.corporate_name', read_only=True)
+    dental_treatment_name = serializers.CharField(source='dental_treatment.name', read_only=True)
+    case_status_name = serializers.CharField(source='case_status.name', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    state_name = serializers.CharField(source='state.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
+
+    customer_name = serializers.CharField(required=False)
+    mobile_number = serializers.CharField(required=False)
+    email_id = serializers.EmailField(required=False)
+    address = serializers.CharField(required=False, allow_blank=True)
+    state = serializers.PrimaryKeyRelatedField(queryset=State.objects.all(), required=False)
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+
+    class Meta:
+        model = DentalTreatmentCase
+        fields = '__all__'
+        read_only_fields = ['case_id', 'created_at']
+
+    def validate_dental_treatment(self, value):
+        if value.treatment_type != 'Dental':
+            raise serializers.ValidationError("Only Dental treatments are allowed in Dental Treatment Case.")
+        return value
+
+    def validate(self, data):
+        case_for = data['case_for']
+        employee = data['employee']
+        initial = self.initial_data
+
+        # SELF
+        if case_for.name.lower() == 'self':
+            data['relationship_person'] = None
+
+            if 'customer_name' not in initial:
+                data['customer_name'] = employee.customer_name
+
+            data['mobile_number'] = initial.get('mobile_number', employee.mobile_no)
+            data['email_id'] = initial.get('email_id', employee.email_id)
+            data['address'] = initial.get('address', employee.area_locality)
+
+            if 'state' not in initial:
+                data['state'] = employee.state
+            else:
+                data['state'] = State.objects.get(id=initial['state'])
+
+            if 'city' not in initial:
+                data['city'] = employee.city
+            else:
+                data['city'] = City.objects.get(id=initial['city'])
+
+        # DEPENDANT
+        else:
+            relationship_person_id = initial.get('relationship_person_id')
+            if not relationship_person_id:
+                raise serializers.ValidationError({"relationship_person_id": "Relationship person is required."})
+
+            dependant = ClientCustomerDependent.objects.filter(
+                id=relationship_person_id,
+                customer=employee,
+                relationship=case_for
+            ).first()
+
+            if not dependant:
+                raise serializers.ValidationError("Invalid relationship person selected.")
+
+            data['relationship_person'] = dependant
+
+            if 'customer_name' not in initial:
+                data['customer_name'] = dependant.name
+
+            required_fields = ['mobile_number', 'email_id', 'state', 'city', 'address']
+            for field in required_fields:
+                if field not in initial:
+                    raise serializers.ValidationError({field: "This field is required for dependant case."})
+
+            data['state'] = State.objects.get(id=initial['state'])
+            data['city'] = City.objects.get(id=initial['city'])
+
+        return data

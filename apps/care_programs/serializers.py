@@ -10,6 +10,7 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    relationship_person_name = serializers.CharField(source='relationship_person.name', read_only=True)
     client_name = serializers.CharField(source='client.corporate_name', read_only=True)
     branch_name = serializers.CharField(source='branch.name', read_only=True)
     employee_name = serializers.CharField(source='employee.corporate_name', read_only=True)
@@ -19,6 +20,7 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='state.name', read_only=True)
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)
     updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
+    case_for_name = serializers.CharField(source='case_for.name', read_only=True)
 
     customer_name = serializers.CharField(required=False)
     mobile_number = serializers.CharField(required=False)

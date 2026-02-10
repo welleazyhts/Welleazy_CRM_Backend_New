@@ -37,7 +37,7 @@ class ClientLoginViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 class ClientUserContextView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         try:

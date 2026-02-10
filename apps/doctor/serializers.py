@@ -10,12 +10,12 @@ from .models import (
 # ---------- CHILD SERIALIZERS ----------
 
 class DoctorServicePriceSerializer(serializers.ModelSerializer):
-    service_name = serializers.CharField(source='empanel_for.name', read_only=True)
+    service_display_name = serializers.CharField(source='service_name.name', read_only=True)
 
     class Meta:
         model = DoctorServicePrice
         fields = [
-            'service_id', 'service', 'service_name', 'price'
+            'id','service_id', 'service_name', 'service_display_name', 'price', 'created_at','updated_at', 'created_by','updated_by', 'deleted_at'
         ]
         read_only_fields = ['service_id']
 
@@ -33,7 +33,7 @@ class DoctorDocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DoctorDocument
-        fields = ['id', 'document_type', 'document_type_name', 'document_file']
+        fields = '__all__'
 
 
 class DoctorBankSerializer(serializers.ModelSerializer):

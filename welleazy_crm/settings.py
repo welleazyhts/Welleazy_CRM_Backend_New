@@ -72,6 +72,10 @@ INSTALLED_APPS = [
     'apps.test_package',
     'apps.doctor_master',
     'apps.doctor',
+    'apps.gympackage',
+    'apps.other_services',
+    'apps.care_programs',
+    'apps.miscellaneous_programs',
     
     # Third-party apps
     'rest_framework',

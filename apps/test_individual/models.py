@@ -10,11 +10,7 @@ from apps.core.models import BaseModel
 
 class IndividualTest(BaseModel):
 
-    STATUS_CHOICES = (
-        ("Active", "Active"),
-        ("Disabled", "Disabled"),
-    )
-
+   
     COMPLIMENTARY_CHOICES = (
         ("Complimentary", "Complimentary"),
         ("TBA", "TBA"),
@@ -22,11 +18,8 @@ class IndividualTest(BaseModel):
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
-    status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICES,
-        default="Active"
-    )
+    status = models.BooleanField(default=True)
+        
 
     test_type = models.ForeignKey(TestType, on_delete=models.SET_NULL, null=True)
     visit_type = models.ForeignKey(MasterVisitType, on_delete=models.SET_NULL, null=True)

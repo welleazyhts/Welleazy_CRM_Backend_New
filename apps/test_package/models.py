@@ -17,10 +17,7 @@ from apps.master_management.models import MasterVisitType , City , MasterGender
 
 class TestPackage(BaseModel):
 
-    STATUS_CHOICES = (
-        ("Active", "Active"),
-        ("Disabled", "Disabled"),
-    )
+    
 
     COMPLIMENTARY_CHOICES = (
         ("Complimentary", "Complimentary"),
@@ -79,11 +76,7 @@ class TestPackage(BaseModel):
         null=True
     )
 
-    status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICES,
-        default="Active"
-    )
+    status = models.BooleanField(default=True)
 
     min_age = models.PositiveIntegerField(null=True, blank=True)
     max_age = models.PositiveIntegerField(null=True, blank=True)

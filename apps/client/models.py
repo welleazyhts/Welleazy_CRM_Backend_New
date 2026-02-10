@@ -12,7 +12,7 @@ class Client(BaseModel):
     # Business Info
     login_type = models.ForeignKey(MasterLoginType, on_delete=models.SET_NULL, null=True, blank=True)
     business_type = models.ForeignKey(BusinessType, on_delete=models.SET_NULL, null=True, blank=True)
-    corporate_code = models.CharField(max_length=100, blank=True, null=True)
+    corporate_code = models.CharField(max_length=100, blank=True, null=True, unique=True)
     corporate_name = models.CharField(max_length=255)
     corporate_type = models.ForeignKey(CorporateType, on_delete=models.SET_NULL, null=True, blank=True)
     
@@ -75,6 +75,24 @@ class Client(BaseModel):
             corporate_type = MasterLoginType.objects.filter(name__iexact="Corporate").first()
             if corporate_type:
                 self.login_type = corporate_type
+        
+        # Auto-generate corporate_code if not present
+        if not self.corporate_code:
+            prefix = "WEZY"
+            last_client = Client.objects.filter(corporate_code__startswith=prefix).order_by('corporate_code').last()
+            
+            if last_client and last_client.corporate_code:
+                try:
+                    last_code = last_client.corporate_code
+                    number_part = int(last_code.replace(prefix, ""))
+                    new_number = number_part + 1
+                except ValueError:
+                    new_number = 1
+            else:
+                new_number = 1
+            
+            self.corporate_code = f"{prefix}{new_number:05d}"
+            
         super().save(*args, **kwargs)
 
     def __str__(self):

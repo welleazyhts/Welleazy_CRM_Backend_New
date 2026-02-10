@@ -104,7 +104,7 @@ class ClientViewSet(viewsets.ModelViewSet):
     
     def _save_client_fields(self, client, validated, request):
         simple_fields = [
-            'corporate_code', 'corporate_name', 'mobile_no', 'landline_no', 'email_id',
+            'corporate_name', 'mobile_no', 'landline_no', 'email_id',
             'head_office_address',            'branch_office_address', 'referred_by',
             'sales_manager', 'broker', 'ops_spoc', 'service_charges', 'pan_no',
             'gst_no', 'home_visit_charges', 'account_id', 'channel_partner_id',
@@ -316,23 +316,3 @@ class ClientViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
     
-    @action(detail=False, methods=["get"], url_path="generate-code")
-    def generate_code(self, request):
-        last_client = Client.objects.filter(corporate_code__startswith="WEZY").order_by('corporate_code').last()
-        
-        if last_client and last_client.corporate_code:
-            try:
-                last_code = last_client.corporate_code
-                number_part = int(last_code.replace("WEZY", ""))
-                new_number = number_part + 1
-            except ValueError:
-                new_number = 1
-        else:
-            new_number = 1
-        
-        new_code = f"WEZY{new_number:05d}"
-        
-        return Response(
-            {"corporate_code": new_code},
-            status=status.HTTP_200_OK
-        )

@@ -46,12 +46,7 @@ class ServiceProviderViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
 
-        # ---- BUSINESS RULE ----
-        if data.get("corporate_group") and not data.get("client_company"):
-            return Response(
-                {"client_company": "Required when corporate_group is Yes"},
-                status=400
-            )
+       
 
         with transaction.atomic():
             provider = ServiceProvider.objects.create(
@@ -86,8 +81,16 @@ class ServiceProviderViewSet(ModelViewSet):
                
             )
 
+            provider.corporate_companies.set(data.get("corporate_companies", []))
             provider.client_company.set(data.get("client_company", []))
             provider.medical_specialties.set(data.get("medical_specialties", []))
+
+             # ---- BUSINESS RULE ----
+            if "corporate_group"=="Yes" and not data.get("corporate_companies"):
+                return Response(
+                {"corporate_companies": "Required when corporate_group is Yes"},
+                status=400
+            )
             
 
             for s in data.get("spocs", []):
@@ -96,15 +99,15 @@ class ServiceProviderViewSet(ModelViewSet):
             for d in data.get("department_contacts", []):
                 DepartmentContact.objects.create(
                 provider=provider,
-        department_id=d["department"],
-        title=d.get("title"),
-        contact_person_name=d.get("contact_person_name"),
-        designation=d.get("designation"),
-        email=d.get("email"),
-        cell_no=d.get("cell_no"),
-        created_by=request.user,
-        updated_by=request.user,
-    )
+                department_id=d["department"],
+                title=d.get("title"),
+                contact_person_name=d.get("contact_person_name"),
+                designation=d.get("designation"),
+                email=d.get("email"),
+                cell_no=d.get("cell_no"),
+                created_by=request.user,
+                updated_by=request.user,
+            )
 
 
             if "recognition" in data:
@@ -124,17 +127,17 @@ class ServiceProviderViewSet(ModelViewSet):
 
             for r in data.get("radiologies", []):
                  RadiologyItem.objects.create(
-        provider=provider,
-        radiology_type_id=r["radiology_type"],
-        status=r.get("status", False),
-        service_mode=r.get("service_mode", "NA"),
-        price=r.get("price"),
-        discount=r.get("discount", 0),
-        time_from=r.get("time_from"),
-        time_to=r.get("time_to"),
-         created_by=request.user,
-        updated_by=request.user,
-    )
+                provider=provider,
+                radiology_type_id=r["radiology_type"],
+                status=r.get("status", False),
+                service_mode=r.get("service_mode", "NA"),
+                price=r.get("price"),
+                discount=r.get("discount", 0),
+                time_from=r.get("time_from"),
+                time_to=r.get("time_to"),
+                created_by=request.user,
+                updated_by=request.user,
+            )
 
             if "bank" in data:
                 BankDetails.objects.create(provider=provider, created_by=request.user, updated_by=request.user, **data["bank"])
@@ -193,6 +196,12 @@ class ServiceProviderViewSet(ModelViewSet):
         data = serializer.validated_data
         user = request.user
 
+        if data.get("corporate_group") == "Yes" and not data.get("corporate_companies"):
+            return Response(
+                {"corporate_companies": "Required when corporate_group is Yes"},
+                status=400
+            )   
+
     # -----------------------------------
     # 1. SIMPLE FIELDS
     # -----------------------------------
@@ -222,6 +231,12 @@ class ServiceProviderViewSet(ModelViewSet):
 
         if "medical_specialties" in data:
             instance.medical_specialties.set(data["medical_specialties"])
+
+        if "corporate_companies" in data:
+            if instance.corporate_group == "Yes":
+                instance.corporate_companies.set(data["corporate_companies"])
+        else:
+            instance.corporate_companies.clear()
 
     # -----------------------------------
     # 3. ONE TO ONE TABLES

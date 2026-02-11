@@ -58,10 +58,9 @@ INSTALLED_APPS = [
 
     'apps.master_management',
     'apps.physical_medical_master',
-    'apps.second_opinion_master',
     'apps.second_opinion',
+    'apps.second_opinion_master',
     
-
     'apps.client_masters',
     'apps.client',
     'apps.client_branch',
@@ -76,6 +75,7 @@ INSTALLED_APPS = [
     'apps.doctor',
     'apps.gympackage',
     'apps.other_services',
+    'apps.care_programs',
     'apps.miscellaneous_programs',
     'apps.consultation',
     'apps.lead_management',

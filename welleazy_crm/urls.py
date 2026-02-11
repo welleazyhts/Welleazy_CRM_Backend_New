@@ -49,8 +49,6 @@ urlpatterns = [
     path("api/second-opinion/", include("apps.second_opinion.urls")),
     path('api/second-opinion-master/',include('apps.second_opinion_master.urls')),
     # path("api/physical-medical-master/",include("apps.physical_medical_master.urls")),
-
-    path('api/token/refresh/', TokenRefreshView.as_view()), 
     
     path('api/master-management/', include('apps.master_management.urls')),
     path('api/client-masters/', include('apps.client_masters.urls')),
@@ -69,6 +67,7 @@ urlpatterns = [
     path('api/' , include('apps.doctor.urls')),
     path('api/' , include('apps.gympackage.urls')),
     path('api/other-services/', include('apps.other_services.urls')),
+    path('api/', include('apps.care_programs.urls')),
     path('api/miscellaneous-programs/', include('apps.miscellaneous_programs.urls')),
     path('api/consultation/', include('apps.consultation.urls')),
     path('api/leads/', include('apps.lead_management.urls')),

@@ -23,19 +23,24 @@ from rest_framework_simplejwt.views import (
 
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
 from apps.accounts.views import (
     AdminLoginAPIView,
     AdminLogoutAPIView,
+    UserViewSet,
 )
 
-from django.conf import settings
-from django.conf.urls.static import static
+router = DefaultRouter()
+router.register('users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
     path("api/admin/login/", AdminLoginAPIView.as_view()),
     path("api/admin/logout/", AdminLogoutAPIView.as_view()),
+    path('api/accounts/', include(router.urls)),
 
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),
@@ -65,6 +70,8 @@ urlpatterns = [
     path('api/' , include('apps.gympackage.urls')),
     path('api/other-services/', include('apps.other_services.urls')),
     path('api/miscellaneous-programs/', include('apps.miscellaneous_programs.urls')),
+    path('api/consultation/', include('apps.consultation.urls')),
+    path('api/leads/', include('apps.lead_management.urls')),
 
 
 ]

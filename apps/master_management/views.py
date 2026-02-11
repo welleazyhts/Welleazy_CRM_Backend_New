@@ -6,7 +6,7 @@ from .models import (MasterProduct, MasterProductFor, MasterProductSubCategory, 
                     MasterTypeOfInsurance, MasterInsuranceCompany, MasterSpeciality,
                     MasterTypeOfProvider, MasterMedicalSurgeryType, MasterMedicalSurgery,
                     MasterPharmacyPartner, MasterMERType, MasterVisitType, MasterGenericTest,
-                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterGender, MasterRelationship, DoctorLanguage , GymVendors,
+                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterGender, MasterRelationship, MasterLanguage , GymVendors,
                     CaseStatus
                     )
 from .serializers import (
@@ -18,7 +18,7 @@ from .serializers import (
     MasterMedicalSurgeryTypeSerializer, MasterMedicalSurgerySerializer,
     MasterPharmacyPartnerSerializer, MasterMERTypeSerializer, MasterVisitTypeSerializer, MasterGenericTestSerializer,
     MasterSpecialtiesTestSerializer, MasterUploadFormatSerializer, MasterLoginTypeSerializer,
-    MasterGenderSerializer, MasterRelationshipSerializer , DoctorLanguageSerializer , GymVendorSerializer , CaseStatusSerializer
+    MasterGenderSerializer, MasterRelationshipSerializer , MasterLanguageSerializer , GymVendorSerializer , CaseStatusSerializer
     )
 
 from .filters import (
@@ -392,9 +392,9 @@ class MasterRelationshipViewSet(viewsets.ModelViewSet):
         serializer.save(updated_by=self.request.user)
 
 
-class DoctorLanguageViewSet(viewsets.ModelViewSet):
-    queryset = DoctorLanguage.objects.all().order_by('name')
-    serializer_class = DoctorLanguageSerializer
+class MasterLanguageViewSet(viewsets.ModelViewSet):
+    queryset = MasterLanguage.objects.all().order_by('name')
+    serializer_class = MasterLanguageSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['is_active']

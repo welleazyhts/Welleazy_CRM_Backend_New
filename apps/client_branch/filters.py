@@ -11,7 +11,8 @@ class ClientBranchFilter(filters.FilterSet):
     state = NumberInFilter(field_name='state__id', lookup_expr='in')
     city = NumberInFilter(field_name='city__id', lookup_expr='in')
     is_active = filters.BooleanFilter()
+    product = filters.NumberFilter(field_name='product_services__product__id')
 
     class Meta:
         model = ClientBranch
-        fields = ['client', 'branch_name', 'email_id', 'mobile_no', 'branch_zone', 'state', 'city', 'is_active']
+        fields = ['client', 'product', 'branch_name', 'email_id', 'mobile_no', 'branch_zone', 'state', 'city', 'is_active']

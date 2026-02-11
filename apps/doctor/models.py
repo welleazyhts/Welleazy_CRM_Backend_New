@@ -5,7 +5,7 @@ from django.db import models
 import uuid
 from django.db import models
 from apps.doctor_master.models import *
-from apps.master_management.models import DoctorLanguage , DoctorQualification , DoctorSpecialization , State , City
+from apps.master_management.models import MasterLanguage, DoctorQualification , DoctorSpecialization , State , City
 from apps.core.models import BaseModel
 
 def generate_doctor_id():
@@ -25,7 +25,7 @@ class Doctor(BaseModel):
     alternate_contact = models.CharField(max_length=15)
     email_id = models.EmailField()
 
-    languages = models.ManyToManyField(DoctorLanguage)
+    languages = models.ManyToManyField(MasterLanguage)
     qualifications = models.ManyToManyField(DoctorQualification)
     specializations = models.ManyToManyField(DoctorSpecialization)
 

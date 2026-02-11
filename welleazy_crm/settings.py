@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     'apps.gympackage',
     'apps.other_services',
     'apps.miscellaneous_programs',
+    'apps.consultation',
+    'apps.lead_management',
     
     # Third-party apps
     'rest_framework',

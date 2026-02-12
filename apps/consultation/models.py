@@ -2,13 +2,14 @@ from django.db import models
 from apps.core.models import BaseModel
 from apps.master_management.models import (
     MasterProduct, MasterProductSubCategory, MasterSpecialtiesTest,
-    MasterBranch, MasterGender, State, City, MasterLanguage,
+    MasterBranch, State, City, MasterLanguage,
     MasterRelationship, CaseStatus
 )
 from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
 from apps.accounts.models import User
 from apps.doctor.models import Doctor
+from apps.core.choices import GENDER_CHOICES
 
 class ConsultationCase(BaseModel):
     # Choices
@@ -84,7 +85,7 @@ class ConsultationCase(BaseModel):
     customer_mobile = models.CharField(max_length=20)
     alternate_number = models.CharField(max_length=20, blank=True, null=True)
     customer_email = models.EmailField(blank=True, null=True)
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     dob = models.DateField(null=True, blank=True)
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)

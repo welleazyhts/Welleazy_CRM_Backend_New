@@ -6,7 +6,7 @@ from .models import (MasterProduct, MasterProductFor, MasterProductSubCategory, 
                     MasterTypeOfInsurance, MasterInsuranceCompany, MasterSpeciality,
                     MasterTypeOfProvider, MasterMedicalSurgeryType, MasterMedicalSurgery,
                     MasterPharmacyPartner, MasterMERType, MasterVisitType, MasterGenericTest,
-                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterGender, MasterRelationship, MasterLanguage , GymVendors,
+                    MasterSpecialtiesTest, MasterUploadFormat, MasterLoginType, MasterRelationship, MasterLanguage , GymVendors,
                     CaseStatus
                     )
 from .serializers import (
@@ -18,7 +18,7 @@ from .serializers import (
     MasterMedicalSurgeryTypeSerializer, MasterMedicalSurgerySerializer,
     MasterPharmacyPartnerSerializer, MasterMERTypeSerializer, MasterVisitTypeSerializer, MasterGenericTestSerializer,
     MasterSpecialtiesTestSerializer, MasterUploadFormatSerializer, MasterLoginTypeSerializer,
-    MasterGenderSerializer, MasterRelationshipSerializer , MasterLanguageSerializer , GymVendorSerializer , CaseStatusSerializer
+    MasterRelationshipSerializer , MasterLanguageSerializer , GymVendorSerializer , CaseStatusSerializer
     )
 
 from .filters import (
@@ -363,19 +363,6 @@ class MasterLoginTypeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
 
-class MasterGenderViewSet(viewsets.ModelViewSet):
-    queryset = MasterGender.objects.all().order_by('name')
-    serializer_class = MasterGenderSerializer
-    permission_classes = [IsAdminUser]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['is_active']
-    search_fields = ['name']
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user, updated_by=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
 
 class MasterRelationshipViewSet(viewsets.ModelViewSet):
     queryset = MasterRelationship.objects.all().order_by('name')

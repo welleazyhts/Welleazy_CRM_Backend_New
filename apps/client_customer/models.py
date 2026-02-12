@@ -4,10 +4,11 @@ from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
 from apps.master_management.models import (
     MasterProduct, MasterProductSubCategory, State, City, 
-    MasterGender, MasterRelationship
+    MasterRelationship
 )
 from apps.client_masters.models import BranchZone
 from apps.test_package.models import TestPackage
+from apps.core.choices import GENDER_CHOICES
 
 class ClientCustomer(BaseModel):
     BLOOD_GROUP_CHOICES = (
@@ -33,8 +34,8 @@ class ClientCustomer(BaseModel):
     customer_name = models.CharField(max_length=255)
     email_id = models.EmailField()
     
-    mobile_no = models.CharField(max_length=20)
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    mobile_no = models.CharField(max_length=20, blank=True, null=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
@@ -117,7 +118,7 @@ class ClientCustomerDependent(BaseModel):
     name = models.CharField(max_length=255)
     relationship = models.ForeignKey(MasterRelationship, on_delete=models.SET_NULL, null=True, blank=True)
     mobile_no = models.CharField(max_length=20, blank=True, null=True)
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     access_profile_permission = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=50, choices=MARITAL_STATUS_CHOICES, blank=True, null=True)

@@ -128,7 +128,6 @@ class CampCaseSerializer(serializers.ModelSerializer):
 
 
     # Optional: names for FK fields in Case
-    gender_name = serializers.CharField(source="customer_gender.name", read_only=True)
     status_name = serializers.CharField(source="case_status.name", read_only=True)
 
     class Meta:

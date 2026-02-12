@@ -10,7 +10,6 @@ class TestPackageSerializer(serializers.ModelSerializer):
     visit_type_name = serializers.CharField(source="visit_type.name", read_only=True)
     checkup_type_name = serializers.CharField(source="checkup_type.name", read_only=True)
     plancategory_name= serializers.CharField(source="plancategory.name" , read_only=True)
-    gender_name=serializers.CharField(source="gender.name" , read_only=True)
 
 
     test_names = serializers.SerializerMethodField(read_only=True)

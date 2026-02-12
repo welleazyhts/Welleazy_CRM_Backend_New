@@ -5,6 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import pandas as pd
 from django.db import transaction
 from .models import SecondOpinionCase
+from apps.core.choices import GENDER_CHOICES
 from apps.client.models import Client
 from .serializers import (
     SecondOpinionCaseSerializer, 
@@ -16,7 +17,7 @@ from .serializers import (
 class SecondOpinionDropdownsAPI(APIView):
     def get(self, request):
         from apps.master_management.models import (
-            MasterGender, MasterRelationship, State, 
+            MasterRelationship, State, 
             City, MasterInsuranceCompany
         )
         from apps.doctor.models import Doctor
@@ -28,7 +29,7 @@ class SecondOpinionDropdownsAPI(APIView):
         case_statuses = [{"id": c[0], "name": c[1]} for c in SecondOpinionCase.CaseStatus.choices]
         
         clients = Client.objects.filter(is_active=True).values('id', 'corporate_name')
-        genders = MasterGender.objects.filter(is_active=True).values('id', 'name')
+        genders = [{"id": c[0], "name": c[1]} for c in GENDER_CHOICES]
         relationships = MasterRelationship.objects.filter(is_active=True).values('id', 'name')
         states = State.objects.filter(is_active=True).values('id', 'name')
         cities = City.objects.filter(is_active=True).values('id', 'name', 'state_id')

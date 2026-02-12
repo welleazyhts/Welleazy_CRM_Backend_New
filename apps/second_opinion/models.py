@@ -3,12 +3,12 @@ from apps.core.models import BaseModel
 from apps.client.models import Client
 from apps.client_customer.models import ClientCustomer
 from apps.master_management.models import (
-    MasterGender,
     MasterRelationship,
     State,
     City,
     MasterInsuranceCompany
 )
+from apps.core.choices import GENDER_CHOICES
 
 
 class SecondOpinionCase(BaseModel):
@@ -33,7 +33,7 @@ class SecondOpinionCase(BaseModel):
     
     # Customer Details
     customer_name = models.CharField(max_length=200, blank=True, null=True) 
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     relationship = models.ForeignKey(MasterRelationship, on_delete=models.SET_NULL, null=True, blank=True)
     
     # Policy Details

@@ -9,7 +9,7 @@ from .views import (MasterProductViewSet, MasterProductForViewSet, MasterProduct
                     MasterMedicalSurgeryViewSet, MasterPharmacyPartnerViewSet,
                     MasterMERTypeViewSet, MasterVisitTypeViewSet, MasterGenericTestViewSet,
                     MasterSpecialtiesTestViewSet, MasterUploadFormatViewSet,
-                    MasterLoginTypeViewSet, MasterGenderViewSet, MasterRelationshipViewSet , MasterLanguageViewSet , GymVendorViewSet,
+                    MasterLoginTypeViewSet, MasterRelationshipViewSet , MasterLanguageViewSet , GymVendorViewSet,
                     CaseStatusViewSet)
 
 router = DefaultRouter()
@@ -37,7 +37,6 @@ router.register(r'generic-tests', MasterGenericTestViewSet)
 router.register(r'specialties-tests', MasterSpecialtiesTestViewSet)
 router.register(r'upload-formats', MasterUploadFormatViewSet)
 router.register(r'login-types', MasterLoginTypeViewSet)
-router.register(r'genders', MasterGenderViewSet)
 router.register(r'relationships', MasterRelationshipViewSet)
 router.register(r'languages', MasterLanguageViewSet)
 router.register(r'gym-vendors', GymVendorViewSet)

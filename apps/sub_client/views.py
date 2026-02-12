@@ -34,6 +34,8 @@ class SubClientViewSet(viewsets.ModelViewSet):
         sub_client.save()
 
         self._save_spocs(sub_client, validated)
+        
+        sub_client = self.get_queryset().get(id=sub_client.id)
 
         return Response(
             {
@@ -55,6 +57,8 @@ class SubClientViewSet(viewsets.ModelViewSet):
         sub_client.save()
 
         self._save_spocs(sub_client, validated)
+
+        sub_client = self.get_queryset().get(id=sub_client.id)
 
         return Response(
             {
@@ -101,7 +105,6 @@ class SubClientViewSet(viewsets.ModelViewSet):
             spoc_id = spoc_data.get("id")
 
             if spoc_id:
-                # UPDATE existing
                 spoc = SubClientSPOC.objects.filter(
                     id=spoc_id,
                     sub_client=sub_client
@@ -121,7 +124,6 @@ class SubClientViewSet(viewsets.ModelViewSet):
                 keep_ids.append(spoc.id)
 
             else:
-                # CREATE new
                 spoc = SubClientSPOC.objects.create(
                     sub_client=sub_client,
                     created_by=sub_client.created_by,
@@ -130,7 +132,6 @@ class SubClientViewSet(viewsets.ModelViewSet):
                 )
                 keep_ids.append(spoc.id)
 
-        # DELETE removed SPOCs
         SubClientSPOC.objects.filter(
             sub_client=sub_client
         ).exclude(id__in=keep_ids).delete()

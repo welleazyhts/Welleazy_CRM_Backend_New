@@ -1,15 +1,15 @@
 from django.db import models
 from apps.core.models import BaseModel
 from apps.master_management.models import (
-    State, City, MasterGender, MasterTypeOfInsurance, 
+    State, City, MasterTypeOfInsurance,
     MasterInsuranceCompany
 )
+from apps.core.choices import GENDER_CHOICES
 
 
 class LeadSource(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
-    
     def __str__(self):
         return self.name
     
@@ -56,7 +56,7 @@ class Lead(BaseModel):
     lead_status = models.ForeignKey(LeadStatus, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     
     phone_no = models.CharField(max_length=20)
     email = models.EmailField()
@@ -118,7 +118,7 @@ class IndividualClient(BaseModel):
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
     
     # Personal Details
-    gender = models.ForeignKey(MasterGender, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     
     # Insurance Information
@@ -141,7 +141,6 @@ class IndividualClient(BaseModel):
     sum_assured = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     
     # Document and Status
-    upload_document = models.FileField(upload_to='individual_clients/documents/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
     
     def __str__(self):
@@ -168,12 +167,7 @@ class IndividualClientDependent(BaseModel):
         null=True,
         blank=True
     )
-    gender = models.ForeignKey(
-        'master_management.MasterGender',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     email_id = models.EmailField(blank=True, null=True)
     age = models.IntegerField(null=True, blank=True)
     
@@ -186,3 +180,20 @@ class IndividualClientDependent(BaseModel):
         ordering = ['individual_client', 'name']
         verbose_name = 'Individual Client Dependent'
         verbose_name_plural = 'Individual Client Dependents'
+
+
+class IndividualClientDocument(BaseModel):
+    individual_client = models.ForeignKey(
+        IndividualClient, 
+        on_delete=models.CASCADE, 
+        related_name='documents'
+    )
+    document = models.FileField(upload_to='individual_clients/documents/')
+    
+    def __str__(self):
+        return f"Document for {self.individual_client.employee_name}"
+    
+    class Meta:
+        db_table = 'individual_client_documents'
+        verbose_name = 'Individual Client Document'
+        verbose_name_plural = 'Individual Client Documents'

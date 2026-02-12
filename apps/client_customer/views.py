@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import ClientCustomer, ClientCustomerDependent
-from apps.master_management.models import MasterGender, MasterRelationship
+from apps.master_management.models import MasterRelationship
+from apps.core.choices import GENDER_CHOICES
 from apps.client.models import Client
 from apps.client_masters.models import BranchZone
 from apps.test_package.models import TestPackage
@@ -117,7 +118,7 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
     def get_meta_data(self, request):
         data = {
             "blood_group_choices": [{"id": c[0], "name": c[1]} for c in ClientCustomer.BLOOD_GROUP_CHOICES],
-            "gender_choices": [{"id": g.id, "name": g.name} for g in MasterGender.objects.all()],
+            "gender_choices": [{"id": g[0], "name": g[1]} for g in GENDER_CHOICES],
             "relationship_choices": [{"id": r.id, "name": r.name} for r in MasterRelationship.objects.all()],
             "client_choices": [{"id": c.id, "name": c.corporate_name} for c in Client.objects.all()],
             "branch_zone_choices": [{"id": bz.id, "name": bz.name} for bz in BranchZone.objects.all()],

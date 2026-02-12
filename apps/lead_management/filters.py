@@ -1,5 +1,5 @@
 import django_filters
-from .models import Lead
+from .models import Lead, IndividualClient
 
 
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
@@ -24,7 +24,7 @@ class LeadFilter(django_filters.FilterSet):
     
     state = NumberInFilter(field_name="state__id", lookup_expr='in')
     city = NumberInFilter(field_name="city__id", lookup_expr='in')
-    gender = NumberInFilter(field_name="gender__id", lookup_expr='in')
+    gender = CharInFilter(field_name="gender", lookup_expr='in')
     
     service_type = CharInFilter(field_name='service_type', lookup_expr='in')
     service_category = CharInFilter(field_name='service_category', lookup_expr='in')
@@ -54,6 +54,31 @@ class LeadFilter(django_filters.FilterSet):
             'service_type', 'service_category',
             'renewal_date', 'renewal_date_from', 'renewal_date_to',
             'reminder_date', 'reminder_date_from', 'reminder_date_to',
+            'reminder_date', 'reminder_date_from', 'reminder_date_to',
             'follow_up_date', 'follow_up_date_from', 'follow_up_date_to',
             'receive_email', 'receive_sms', 'receive_whatsapp'
         ]
+
+
+class IndividualClientFilter(django_filters.FilterSet):
+    employee_name = django_filters.CharFilter(lookup_expr='icontains')
+    employee_id = django_filters.CharFilter(lookup_expr='icontains')
+    contact_no = django_filters.CharFilter(lookup_expr='icontains')
+    company_email = django_filters.CharFilter(lookup_expr='icontains')
+    company_name = django_filters.CharFilter(lookup_expr='icontains')
+    
+    status = CharInFilter(field_name='status', lookup_expr='in')
+    state = NumberInFilter(field_name="state__id", lookup_expr='in')
+    city = NumberInFilter(field_name="city__id", lookup_expr='in')
+    gender = CharInFilter(field_name="gender", lookup_expr='in')
+    
+    type_of_insurance = NumberInFilter(field_name="type_of_insurance__id", lookup_expr='in')
+    current_insurer = NumberInFilter(field_name="current_insurer__id", lookup_expr='in')
+    
+    expiry_date = django_filters.DateFilter()
+    expiry_date_from = django_filters.DateFilter(field_name='expiry_date', lookup_expr='gte')
+    expiry_date_to = django_filters.DateFilter(field_name='expiry_date', lookup_expr='lte')
+
+    class Meta:
+        model = IndividualClient
+        fields = []

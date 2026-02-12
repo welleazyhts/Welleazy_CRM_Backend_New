@@ -1,10 +1,4 @@
 from django.db import models
-
-# Create your models here.
-
-
-
-from django.db import models
 from apps.test_management_master.models import (
     PlanCategory,
     CheckUpType
@@ -12,7 +6,8 @@ from apps.test_management_master.models import (
 from apps.test_individual.models import IndividualTest
 from apps.core.models import BaseModel
 from apps.client.models import Client
-from apps.master_management.models import MasterVisitType , City , MasterGender
+from apps.master_management.models import MasterVisitType , City
+from apps.core.choices import GENDER_CHOICES
 
 
 class TestPackage(BaseModel):
@@ -81,11 +76,7 @@ class TestPackage(BaseModel):
     min_age = models.PositiveIntegerField(null=True, blank=True)
     max_age = models.PositiveIntegerField(null=True, blank=True)
 
-    gender = models.ForeignKey(
-        MasterGender,
-        on_delete=models.SET_NULL,
-        null=True
-    )
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
 
     package_validity_date = models.DateField(null=True, blank=True)
 

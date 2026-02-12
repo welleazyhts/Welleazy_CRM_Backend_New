@@ -29,6 +29,8 @@ class ClientBranchViewSet(viewsets.ModelViewSet):
         self._save_branch_fields(branch, validated)
         branch.save()
 
+        branch = self.get_queryset().get(id=branch.id)
+
         return Response(
             {
                 "message": "Client Branch created successfully",
@@ -47,6 +49,8 @@ class ClientBranchViewSet(viewsets.ModelViewSet):
         self._save_branch_fields(branch, validated)
         branch.save()
 
+        branch = self.get_queryset().get(id=branch.id)
+
         return Response(
             {
                 "message": "Client Branch updated successfully",
@@ -62,8 +66,6 @@ class ClientBranchViewSet(viewsets.ModelViewSet):
             {"message": "Client Branch deleted successfully"},
             status=status.HTTP_200_OK
         )
-
-    # HELPER METHODS
 
     def _save_branch_fields(self, branch, validated):
         simple_fields = [   

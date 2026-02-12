@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ConsultationCase, ConsultationAppointment
-from apps.master_management.models import MasterProduct, MasterProductSubCategory, MasterBranch, MasterGender, State, City, MasterLanguage, MasterRelationship, CaseStatus, MasterSpecialtiesTest
+from apps.master_management.models import MasterProduct, MasterProductSubCategory, MasterBranch, State, City, MasterLanguage, MasterRelationship, CaseStatus, MasterSpecialtiesTest
 from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
 from apps.accounts.models import User
@@ -22,7 +22,6 @@ class ConsultationCaseSerializer(serializers.ModelSerializer):
     welleazy_branch_name = serializers.CharField(source='welleazy_branch.name', read_only=True)
     corporate_name_display = serializers.CharField(source='corporate_name.corporate_name', read_only=True)
     branch_name_display = serializers.CharField(source='branch_name.branch_name', read_only=True)
-    gender_name = serializers.CharField(source='gender.name', read_only=True)
     state_name = serializers.CharField(source='state.name', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
     preferred_language_name = serializers.CharField(source='preferred_language.name', read_only=True)

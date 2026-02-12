@@ -58,6 +58,8 @@ class ClientViewSet(viewsets.ModelViewSet):
         self._save_spocs(client, validated)
         self._save_documents(client, validated, request)
 
+        client = self.get_queryset().get(id=client.id)
+
         return Response(
             {
                 "message": "Client created successfully",
@@ -82,6 +84,8 @@ class ClientViewSet(viewsets.ModelViewSet):
         self._save_spocs(client, validated)
         self._save_documents(client, validated, request)
 
+        client = self.get_queryset().get(id=client.id)
+
         return Response(
             {
                 "message": "Client updated successfully",
@@ -100,7 +104,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    # HELPER METHODS
     
     def _save_client_fields(self, client, validated, request):
         simple_fields = [
@@ -128,7 +131,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             if field in validated:
                 setattr(client, field, validated[field])
         
-        # Handle image upload
         if 'background_image' in request.FILES:
             client.background_image = request.FILES['background_image']
         
@@ -140,7 +142,7 @@ class ClientViewSet(viewsets.ModelViewSet):
     
     def _save_spocs(self, client, validated):
         if "spocs" not in validated:
-            return  # keep existing SPOCs untouched
+            return  
 
         spocs_data = validated["spocs"]
         keep_ids = []
@@ -150,7 +152,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             receive_email_for = spoc_data.pop("receive_email_for", [])
 
             if spoc_id:
-                # UPDATE existing
                 spoc = ClientSPOC.objects.filter(
                     id=spoc_id,
                     client=client
@@ -169,7 +170,6 @@ class ClientViewSet(viewsets.ModelViewSet):
                 keep_ids.append(spoc.id)
 
             else:
-                # CREATE new
                 spoc = ClientSPOC.objects.create(
                     client=client,
                     created_by=client.created_by,
@@ -181,7 +181,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             if receive_email_for is not None:
                 spoc.receive_email_for.set(receive_email_for)
 
-        # DELETE removed SPOCs
         ClientSPOC.objects.filter(
             client=client
         ).exclude(id__in=keep_ids).delete()
@@ -195,7 +194,6 @@ class ClientViewSet(viewsets.ModelViewSet):
             request.FILES.getlist("upload_document")
         )
 
-        # 🔹 CREATE: always save uploaded files
         if not client.pk or self.action == "create":
             for file in files:
                 ClientDocument.objects.create(
@@ -206,9 +204,8 @@ class ClientViewSet(viewsets.ModelViewSet):
                 )
             return
 
-        # 🔹 UPDATE: sync by id
         if "documents" not in validated:
-            return  # keep existing untouched
+            return  
 
         keep_ids = []
 
@@ -228,7 +225,6 @@ class ClientViewSet(viewsets.ModelViewSet):
 
                 keep_ids.append(document.id)
 
-        # add new uploads
         for file in files:
             document = ClientDocument.objects.create(
                 client=client,
@@ -238,13 +234,11 @@ class ClientViewSet(viewsets.ModelViewSet):
             )
             keep_ids.append(document.id)
 
-        # delete removed
         ClientDocument.objects.filter(
             client=client
         ).exclude(id__in=keep_ids).delete()
 
 
-    # DOCUMENT MANAGEMENT ENDPOINTS
     
     @action(detail=True, methods=["post"], url_path="documents", parser_classes=[MultiPartParser])
     def add_document(self, request, pk=None):

@@ -20,7 +20,7 @@ class ConsultationCaseViewSet(viewsets.ModelViewSet):
     queryset = ConsultationCase.objects.select_related(
         'consultation_type', 'service', 'specialities_test_list',
         'welleazy_branch', 'corporate_name',
-        'branch_name', 'gender', 'state', 'city',
+        'branch_name', 'state', 'city',
         'preferred_language', 'sponsor_status', 'case_status',
         'created_by', 'updated_by'
     ).prefetch_related('appointments').all().order_by('-created_at')

@@ -1,15 +1,13 @@
 from django.conf import settings
 from django.db import models
-
-# Create your models here.
-
 from apps.client.models import Client
 from apps.sub_client.models import SubClient
 from apps.test_package.models import TestPackage
 from apps.test_individual.models import IndividualTest as Test
 from apps.core.models import BaseModel
 from django.utils import timezone
-from apps.master_management.models import State, City , MasterGender , CaseStatus , MasterProduct , MasterProductSubCategory , MasterRelationship
+from apps.master_management.models import State, City , CaseStatus , MasterProduct , MasterProductSubCategory , MasterRelationship
+from apps.core.choices import GENDER_CHOICES
 from apps.service_provider.models import ServiceProvider
 from apps.doctor.models import Doctor
 from apps.client_branch.models import ClientBranch
@@ -161,7 +159,7 @@ class CampCase(BaseModel):
     customer_mobile = models.CharField(max_length=20)
     customer_email = models.EmailField(blank=True, null=True)
 
-    customer_gender = models.ForeignKey(MasterGender, on_delete=models.PROTECT)
+    customer_gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     case_status = models.ForeignKey(CaseStatus, on_delete=models.PROTECT)
 
     document = models.FileField(upload_to="case_documents/", blank=True, null=True)

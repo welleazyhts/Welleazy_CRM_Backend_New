@@ -1,7 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import ValidationError
@@ -70,19 +68,15 @@ class TestPackageViewSet(ModelViewSet):
         corporate_name = params.get("corporate_name")
         status = params.get("status")
 
-        # 🔹 SKU Code filter
         if sku_code:
             queryset = queryset.filter(product_sku__icontains=sku_code)
 
-        # 🔹 Package Name filter
         if package_name:
             queryset = queryset.filter(package_name__icontains=package_name)
 
-        # 🔹 Corporate Name filter
         if corporate_name:
             queryset = queryset.filter(client__corporate_name__icontains=corporate_name)
 
-        # 🔹 Status filter
         if status:
             queryset = queryset.filter(status=status)
 

@@ -274,19 +274,19 @@ class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
                     "relationship_person_id": "Relationship person is required."
                 })
 
-            dependant = ClientCustomerDependent.objects.filter(
+            dependent = ClientCustomerDependent.objects.filter(
                 id=relationship_person_id,
                 customer=employee,
                 relationship=case_for
             ).first()
 
-            if not dependant:
+            if not dependent:
                 raise serializers.ValidationError(
                     "Invalid relationship person selected."
                 )
 
             if 'customer_name' not in initial:
-                data['customer_name'] = dependant.name
+                data['customer_name'] = dependent.name
 
             required_fields=[
                 'mobile_number',
@@ -299,7 +299,7 @@ class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
             for field in required_fields:
                 if field not in initial:
                     raise serializers.ValidationError({
-                        field: "This field is required for dependant case."
+                        field: "This field is required for dependent case."
                     })
                 
 
@@ -368,30 +368,30 @@ class DentalTreatmentCaseSerializer(serializers.ModelSerializer):
             else:
                 data['city'] = City.objects.get(id=initial['city'])
 
-        # DEPENDANT
+        # dependent
         else:
             relationship_person_id = initial.get('relationship_person_id')
             if not relationship_person_id:
                 raise serializers.ValidationError({"relationship_person_id": "Relationship person is required."})
 
-            dependant = ClientCustomerDependent.objects.filter(
+            dependent = ClientCustomerDependent.objects.filter(
                 id=relationship_person_id,
                 customer=employee,
                 relationship=case_for
             ).first()
 
-            if not dependant:
+            if not dependent:
                 raise serializers.ValidationError("Invalid relationship person selected.")
 
-            data['relationship_person'] = dependant
+            data['relationship_person'] = dependent
 
             if 'customer_name' not in initial:
-                data['customer_name'] = dependant.name
+                data['customer_name'] = dependent.name
 
             required_fields = ['mobile_number', 'email_id', 'state', 'city', 'address']
             for field in required_fields:
                 if field not in initial:
-                    raise serializers.ValidationError({field: "This field is required for dependant case."})
+                    raise serializers.ValidationError({field: "This field is required for dependent case."})
 
             data['state'] = State.objects.get(id=initial['state'])
             data['city'] = City.objects.get(id=initial['city'])

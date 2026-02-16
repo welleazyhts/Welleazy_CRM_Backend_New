@@ -15,6 +15,7 @@ from .serializers import (
     IndividualClientSerializer, IndividualClientPayloadSerializer
 )
 from .filters import LeadFilter, IndividualClientFilter
+from apps.core.services import DocumentService
 
 
 class LeadSourceViewSet(viewsets.ModelViewSet):
@@ -178,73 +179,36 @@ class IndividualClientViewSet(viewsets.ModelViewSet):
             return IndividualClientPayloadSerializer
         return IndividualClientSerializer
 
-    def _extract_payload(self, request):
-        payload = request.POST.get('data')
-
-        if payload:
-            try:
-                return json.loads(payload)
-            except json.JSONDecodeError:
-                from rest_framework.exceptions import ValidationError
-                raise ValidationError({"error": "Invalid JSON format in 'data' field"})
-
-        return {}
-
+    @transaction.atomic
+    def perform_create(self, serializer):
+        data = serializer.initial_data
+        instance = serializer.save(created_by=self.request.user, updated_by=self.request.user)
+        self._handle_related(instance, data)
 
     @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        payload = self._extract_payload(request)
-        serializer = self.get_serializer(data=payload)
-        serializer.is_valid(raise_exception=True)
-        validated = serializer.validated_data
+    def perform_update(self, serializer):
+        data = serializer.initial_data
+        instance = serializer.save(updated_by=self.request.user)
+        self._handle_related(instance, data)
 
-        client = IndividualClient(
-            created_by=request.user,
-            updated_by=request.user,
-        )
-        
-        self._save_client_fields(client, validated)
-        client.save()
-        
-        self._save_dependents(client, validated)
-        self._save_documents(client, validated, request)
+    def _handle_related(self, instance, data):
+        dependents_data = DocumentService.get_nested_data(data, 'dependents')
+        documents_data = DocumentService.get_nested_data(data, 'documents')
 
-        client = self.get_queryset().get(id=client.id)
+        if dependents_data is not None:
+            self._save_dependents(instance, dependents_data)
 
-        return Response({
-            "message": "Individual client created successfully",
-            "data": IndividualClientSerializer(client).data
-        }, status=status.HTTP_201_CREATED)
-
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        payload = self._extract_payload(request)
-        serializer = self.get_serializer(instance, data=payload, partial=kwargs.get('partial', False))
-        serializer.is_valid(raise_exception=True)
-        validated = serializer.validated_data
-
-        instance.updated_by = request.user
-        self._save_client_fields(instance, validated)
-        instance.save()
-        
-        self._save_dependents(instance, validated)
-        self._save_documents(instance, validated, request)
-
-        instance = self.get_queryset().get(id=instance.id)
-
-        return Response({
-            "message": "Individual client updated successfully",
-            "data": IndividualClientSerializer(instance).data
-        }, status=status.HTTP_200_OK)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(
-            {"message": "Individual client deleted successfully"},
-            status=status.HTTP_200_OK
-        )
+        if documents_data is not None or self.request.FILES:
+            DocumentService.sync_documents(
+                parent_instance=instance,
+                files=self.request.FILES,
+                documents_json=documents_data,
+                model=IndividualClientDocument,
+                parent_field='individual_client',
+                file_field='document',
+                user=self.request.user,
+                include_keys=['documents', 'new_documents']
+            )
 
     def _save_client_fields(self, client, validated):
         fields = [
@@ -257,24 +221,31 @@ class IndividualClientViewSet(viewsets.ModelViewSet):
             if field in validated:
                 setattr(client, field, validated[field])
 
-    def _save_dependents(self, client, validated):
-        if 'dependents' not in validated:
+    def _save_dependents(self, client, dependents_data):
+        if dependents_data is None:
             return
-
-        dependents_data = validated['dependents']
         keep_ids = []
 
         from rest_framework.exceptions import ValidationError
         for data in dependents_data:
             dependent_id = data.get('id')
+            
+            clean_data = {}
+            for k, v in data.items():
+                if k in ['id', 'individual_client']:
+                    continue
+                if k == 'relationship' and isinstance(v, int):
+                    clean_data['relationship_id'] = v
+                else:
+                    clean_data[k] = v
+
             if dependent_id:
                 dependent = IndividualClientDependent.objects.filter(id=dependent_id, individual_client=client).first()
                 if not dependent:
                     raise ValidationError({"dependents": f"Invalid dependent ID {dependent_id} for this client"})
                 
-                for attr, value in data.items():
-                    if attr != 'id':
-                        setattr(dependent, attr, value)
+                for attr, value in clean_data.items():
+                    setattr(dependent, attr, value)
                 dependent.updated_by = client.updated_by
                 dependent.save()
                 keep_ids.append(dependent.id)
@@ -283,54 +254,12 @@ class IndividualClientViewSet(viewsets.ModelViewSet):
                     individual_client=client,
                     created_by=client.created_by,
                     updated_by=client.updated_by,
-                    **data
+                    **clean_data
                 )
                 keep_ids.append(dependent.id)
 
         IndividualClientDependent.objects.filter(individual_client=client).exclude(id__in=keep_ids).delete()
 
-    def _save_documents(self, client, validated, request):
-        files = (
-            request.FILES.getlist("documents") or
-            request.FILES.getlist("files") or
-            request.FILES.getlist("file")
-        )
-
-        if self.action == "create":
-            for file in files:
-                doc = IndividualClientDocument.objects.create(
-                    individual_client=client,
-                    document=file,
-                    created_by=request.user,
-                    updated_by=request.user,
-                )
-            return
-
-        keep_ids = []
-        if "documents" in validated:
-            doc_validated_data = validated.get("documents", [])
-            from rest_framework.exceptions import ValidationError
-            for doc_data in doc_validated_data:
-                doc_id = doc_data.get("id")
-                if doc_id:
-                    doc_obj = IndividualClientDocument.objects.filter(id=doc_id, individual_client=client).first()
-                    if not doc_obj:
-                        raise ValidationError({"documents": f"Invalid document ID {doc_id} for this client"})
-                    keep_ids.append(doc_id)
-        else:
-            keep_ids = list(IndividualClientDocument.objects.filter(individual_client=client).values_list('id', flat=True))
-
-        for file in files:
-            doc = IndividualClientDocument.objects.create(
-                individual_client=client,
-                document=file,
-                created_by=request.user,
-                updated_by=request.user,
-            )
-            keep_ids.append(doc.id)
-
-        if "documents" in validated or files:
-            IndividualClientDocument.objects.filter(individual_client=client).exclude(id__in=keep_ids).delete()
 
     @action(detail=False, methods=['get'], url_path='choices')
     def get_choices(self, request):

@@ -13,6 +13,7 @@ from .serializers import ClientSerializer, ClientPayloadSerializer, ClientDocume
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .filters import ClientFilter
+from apps.core.services import DocumentService
 
 class ClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser] 
@@ -26,89 +27,41 @@ class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def _extract_payload(self, request):
-        if isinstance(request.data, dict) and "data" in request.data:
-            try:
-                return json.loads(request.data["data"])
-            except json.JSONDecodeError:
-                raise ValidationError({"error": "Invalid JSON format in 'data' field"})
-        return request.data
-
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_class = ClientFilter
-    search_fields = ['corporate_name', 'corporate_code', 'email_id', 'mobile_no']
-    ordering_fields = ['created_at', 'corporate_name']
+    @transaction.atomic
+    def perform_create(self, serializer):
+        data = serializer.initial_data
+        instance = serializer.save(created_by=self.request.user, updated_by=self.request.user)
+        self._handle_related(instance, data)
 
     @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        payload = self._extract_payload(request)
+    def perform_update(self, serializer):
+        data = serializer.initial_data
+        instance = serializer.save(updated_by=self.request.user)
+        self._handle_related(instance, data)
 
-        serializer = ClientPayloadSerializer(data=payload)
-        serializer.is_valid(raise_exception=True)
-        validated = serializer.validated_data
+    def _handle_related(self, instance, data):
+        spocs_data = DocumentService.get_nested_data(data, 'spocs')
+        documents_data = DocumentService.get_nested_data(data, 'documents')
 
-        client = Client(
-            created_by=request.user,
-            updated_by=request.user,
-        )
+        if spocs_data is not None:
+            self._save_spocs(instance, spocs_data)
 
-        self._save_client_fields(client, validated, request)
-        client.save()
+        if documents_data is not None or self.request.FILES:
+            DocumentService.sync_documents(
+                parent_instance=instance,
+                files=self.request.FILES,
+                documents_json=documents_data,
+                model=ClientDocument,
+                parent_field='client',
+                file_field='file',
+                user=self.request.user,
+                include_keys=['documents', 'new_documents']
+            )
 
-        self._save_spocs(client, validated)
-        self._save_documents(client, validated, request)
-
-        client = self.get_queryset().get(id=client.id)
-
-        return Response(
-            {
-                "message": "Client created successfully",
-                "data": ClientSerializer(client, context={'request': request}).data
-            },
-            status=status.HTTP_201_CREATED
-        )
-
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        client = self.get_object()
-        payload = self._extract_payload(request)
-
-        serializer = ClientPayloadSerializer(data=payload)
-        serializer.is_valid(raise_exception=True)
-        validated = serializer.validated_data
-
-        client.updated_by = request.user
-        self._save_client_fields(client, validated, request)
-        client.save()
-
-        self._save_spocs(client, validated)
-        self._save_documents(client, validated, request)
-
-        client = self.get_queryset().get(id=client.id)
-
-        return Response(
-            {
-                "message": "Client updated successfully",
-                "data": ClientSerializer(client, context={'request': request}).data
-            },
-            status=status.HTTP_200_OK
-        )
-
-    
-    
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(
-            {"message": "Client deleted successfully"},
-            status=status.HTTP_200_OK
-        )
-
-    
     def _save_client_fields(self, client, validated, request):
         simple_fields = [
             'corporate_name', 'mobile_no', 'landline_no', 'email_id',
-            'head_office_address',            'branch_office_address', 'referred_by',
+            'head_office_address', 'branch_office_address', 'referred_by',
             'sales_manager', 'broker', 'ops_spoc', 'service_charges', 'pan_no',
             'gst_no', 'home_visit_charges', 'account_id', 'channel_partner_id',
             'website_url', 'billing_email_address', 'is_active', 'total_sponsored',
@@ -134,22 +87,26 @@ class ClientViewSet(viewsets.ModelViewSet):
         if 'background_image' in request.FILES:
             client.background_image = request.FILES['background_image']
         
-        if not client.pk:
-            client.save()
-        
         if 'members_sponsored' in validated:
             client.members_sponsored.set(validated['members_sponsored'])
     
-    def _save_spocs(self, client, validated):
-        if "spocs" not in validated:
+    def _save_spocs(self, client, spocs_data):
+        if spocs_data is None:
             return  
-
-        spocs_data = validated["spocs"]
         keep_ids = []
 
         for spoc_data in spocs_data:
             spoc_id = spoc_data.get("id")
             receive_email_for = spoc_data.pop("receive_email_for", [])
+            
+            clean_data = {}
+            for k, v in spoc_data.items():
+                if k in ['id', 'client']:
+                    continue
+                if k == 'designation' and isinstance(v, int):
+                    clean_data['designation_id'] = v
+                else:
+                    clean_data[k] = v
 
             if spoc_id:
                 spoc = ClientSPOC.objects.filter(
@@ -162,7 +119,7 @@ class ClientViewSet(viewsets.ModelViewSet):
                         "spocs": f"Invalid SPOC id {spoc_id} for this client"
                     })
 
-                for field, value in spoc_data.items():
+                for field, value in clean_data.items():
                     setattr(spoc, field, value)
 
                 spoc.updated_by = client.updated_by
@@ -174,7 +131,7 @@ class ClientViewSet(viewsets.ModelViewSet):
                     client=client,
                     created_by=client.created_by,
                     updated_by=client.updated_by,
-                    **spoc_data
+                    **clean_data
                 )
                 keep_ids.append(spoc.id)
 
@@ -186,57 +143,6 @@ class ClientViewSet(viewsets.ModelViewSet):
         ).exclude(id__in=keep_ids).delete()
 
     
-    def _save_documents(self, client, validated, request):
-        files = (
-            request.FILES.getlist("documents") or
-            request.FILES.getlist("files") or
-            request.FILES.getlist("file") or
-            request.FILES.getlist("upload_document")
-        )
-
-        if not client.pk or self.action == "create":
-            for file in files:
-                ClientDocument.objects.create(
-                    client=client,
-                    file=file,
-                    created_by=request.user,
-                    updated_by=request.user,
-                )
-            return
-
-        if "documents" not in validated:
-            return  
-
-        keep_ids = []
-
-        for doc in validated["documents"]:
-            doc_id = doc.get("id")
-
-            if doc_id:
-                document = ClientDocument.objects.filter(
-                    id=doc_id,
-                    client=client
-                ).first()
-
-                if not document:
-                    raise ValidationError({
-                        "documents": f"Invalid document id {doc_id}"
-                    })
-
-                keep_ids.append(document.id)
-
-        for file in files:
-            document = ClientDocument.objects.create(
-                client=client,
-                file=file,
-                created_by=request.user,
-                updated_by=request.user,
-            )
-            keep_ids.append(document.id)
-
-        ClientDocument.objects.filter(
-            client=client
-        ).exclude(id__in=keep_ids).delete()
 
 
     
@@ -249,20 +155,22 @@ class ClientViewSet(viewsets.ModelViewSet):
         if not files:
             raise ValidationError({"documents": "At least one file is required"})
         
-        created_documents = []
-        for file in files:
-            document = ClientDocument.objects.create(
-                client=client,
-                file=file,
-                created_by=request.user,
-                updated_by=request.user,
-            )
-            created_documents.append(document)
+        DocumentService.sync_documents(
+            parent_instance=client,
+            files=request.FILES,
+            documents_json=None, 
+            model=ClientDocument,
+            parent_field='client',
+            file_field='file',
+            user=request.user,
+            include_keys=['documents', 'new_documents']
+        )
         
+
         return Response(
             {
-                "message": f"{len(created_documents)} document(s) uploaded successfully",
-                "data": ClientDocumentSerializer(created_documents, many=True, context={'request': request}).data
+                "message": "Document(s) uploaded successfully",
+                "data": ClientDocumentSerializer(client.documents.all(), many=True, context={'request': request}).data
             },
             status=status.HTTP_201_CREATED
         )

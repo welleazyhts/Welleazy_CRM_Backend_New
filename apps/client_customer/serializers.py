@@ -14,6 +14,18 @@ class ClientCustomerAddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('customer',)
 
+    def validate(self, attrs):
+        city = attrs.get('city')
+        state = attrs.get('state')
+        
+        # Validate city belongs to state
+        if city and state and city.state != state:
+            raise serializers.ValidationError({
+                "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."
+            })
+        
+        return attrs
+
 class ClientCustomerDependentSerializer(serializers.ModelSerializer):
     relationship_name = serializers.CharField(source='relationship.name', read_only=True)
 
@@ -54,5 +66,48 @@ class ClientCustomerSerializer(serializers.ModelSerializer):
             for package in obj.packages.all()
         ]
 
-    def validate(self, data):
-        return data
+    def validate(self, attrs):
+        client = attrs.get('client')
+        branch = attrs.get('branch')
+        city = attrs.get('city')
+        state = attrs.get('state')
+        product = attrs.get('product')
+        services = attrs.get('services', [])
+        
+        if branch and client and branch.client != client:
+            raise serializers.ValidationError({
+                "branch": f"The selected branch '{branch.branch_name}' does not belong to the client '{client.corporate_name}'."
+            })
+        
+        if city and state and city.state != state:
+            raise serializers.ValidationError({
+                "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."
+            })
+        
+        if product and client:
+            from apps.client_product_service.models import ClientProductService
+            
+            client_has_product = ClientProductService.objects.filter(
+                product=product,
+                client=client,
+                is_active=True
+            ).exists()
+            
+            if not client_has_product:
+                raise serializers.ValidationError({
+                    "product": f"The product '{product.name}' is not mapped to client '{client.corporate_name}'."
+                })
+        
+        if services and product:
+            from apps.master_management.models import ServiceMapping
+            
+            mapping = ServiceMapping.objects.filter(product=product).first()
+            if mapping:
+                valid_service_ids = set(mapping.sub_products.values_list('id', flat=True))
+                for service in services:
+                    if service.id not in valid_service_ids:
+                        raise serializers.ValidationError({
+                            "services": f"The service '{service.name}' is not mapped to product '{product.name}'."
+                        })
+        
+        return attrs

@@ -56,12 +56,24 @@ class ConsultationCase(BaseModel):
         ('Scheduled', 'Scheduled'),
         ('Completed', 'Completed'),
         ('Cancelled', 'Cancelled'),
+        ('Pending', 'Pending'),
         ('Rescheduled', 'Rescheduled'),
+    ]
+    SPONSOR_STATUS_CHOICES = [
+        ('Yes', 'Yes'),
+        ('No', 'No'),
+        ('Partial', 'Partial'),
+    ]
+    CASE_TYPE_CHOICES = [
+        ('Main', 'Main'),
+        ('Additional', 'Additional'),
     ]
 
     consultation_type = models.ForeignKey(MasterProduct, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultation_cases')
     service = models.ForeignKey(MasterProductSubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultation_cases')
     specialities_test_list = models.ForeignKey(MasterSpecialtiesTest, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultation_cases')
+    
+    case_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
 
     case_rec_mode = models.CharField(max_length=50, choices=CASE_REC_MODE_CHOICES, default='Email')
     case_rec_date_time = models.DateTimeField(null=True, blank=True)
@@ -74,8 +86,8 @@ class ConsultationCase(BaseModel):
     customer_type = models.CharField(max_length=50, choices=CUSTOMER_TYPE_CHOICES, default='New')
     members_sponsored = models.CharField(max_length=255, blank=True, null=True)
     received_by_name = models.CharField(max_length=255, blank=True, null=True)
-    mobile_number = models.CharField(max_length=20, blank=True, null=True) # Client SPOC
-    email_id = models.EmailField(blank=True, null=True) # Client SPOC
+    mobile_number = models.CharField(max_length=20, blank=True, null=True) 
+    email_id = models.EmailField(blank=True, null=True)
     department = models.CharField(max_length=255, blank=True, null=True)
     channel_partner_name = models.CharField(max_length=255, blank=True, null=True)
     channel_partner_id = models.CharField(max_length=100, blank=True, null=True)
@@ -91,10 +103,9 @@ class ConsultationCase(BaseModel):
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
     pincode = models.CharField(max_length=10, blank=True, null=True)
     preferred_language = models.ForeignKey(MasterLanguage, on_delete=models.SET_NULL, null=True, blank=True)
-    sponsor_status = models.ForeignKey(MasterRelationship, on_delete=models.SET_NULL, null=True, blank=True)
+    sponsor_status = models.CharField(max_length=100, choices=SPONSOR_STATUS_CHOICES, blank=True, null=True)
     no_of_free_consultations = models.PositiveIntegerField(default=0)
     no_of_consultations_used = models.PositiveIntegerField(default=0)
-    upload_document = models.FileField(upload_to='consultation/documents/', blank=True, null=True)
 
     application_no = models.CharField(max_length=100, blank=True, null=True)
     customer_profile = models.CharField(max_length=50, choices=CUSTOMER_PROFILE_CHOICES, default='Normal')
@@ -115,6 +126,19 @@ class ConsultationCase(BaseModel):
     remarks = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.case_id:
+            last_case = ConsultationCase.objects.filter(case_id__startswith='WX').order_by('-case_id').first()
+            if last_case:
+                try:
+                    last_id_numeric = int(last_case.case_id.replace('WX', ''))
+                    new_id_numeric = last_id_numeric + 1
+                    self.case_id = f"WX{new_id_numeric:05d}"
+                except ValueError:
+                    self.case_id = "WX00001"
+            else:
+                count = ConsultationCase.objects.all().count()
+                self.case_id = f"WX{count + 1:05d}"
+
         if not self.id and self.consultation_type:
             if self.consultation_type.name == "Comprehensive Services":
                 if self.payable_amount == 250.00: 
@@ -132,15 +156,56 @@ class ConsultationCase(BaseModel):
         db_table = 'consultation_cases'
         ordering = ['-created_at']
 
-class ConsultationAppointment(BaseModel):
-    case = models.ForeignKey(ConsultationCase, on_delete=models.CASCADE, related_name='appointments')
-    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultation_appointments')
+class ConsultationDoctorDetails(BaseModel):
+    case = models.ForeignKey(ConsultationCase, on_delete=models.CASCADE, related_name='doctor_details')
+    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultation_doctor_details')
+    preferred_language = models.ForeignKey(MasterLanguage, on_delete=models.SET_NULL, null=True, blank=True)
     appointment_date_time = models.DateTimeField()
     status = models.CharField(max_length=50, choices=ConsultationCase.APPOINTMENT_STATUS_CHOICES, default='Scheduled')
+    case_status = models.ForeignKey(CaseStatus, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"Appointment for Case {self.case.id} with {self.doctor.doctor_name if self.doctor else 'Unassigned'}"
+        return f"Doctor Details for Case {self.case.id} with {self.doctor.doctor_name if self.doctor else 'Unassigned'}"
+
+class ConsultationCaseDependent(BaseModel):
+    case = models.ForeignKey(ConsultationCase, on_delete=models.CASCADE, related_name='dependents')
+    
+    person_name = models.CharField(max_length=255)
+    dob = models.DateField(null=True, blank=True)
+    mobile_no = models.CharField(max_length=20, blank=True, null=True)
+    email_id = models.EmailField(blank=True, null=True)
+    relationship = models.ForeignKey(MasterRelationship, on_delete=models.SET_NULL, null=True, blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
+    
+    payable_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    payment_mode = models.CharField(max_length=50, choices=ConsultationCase.PAYMENT_MODE_CHOICES, blank=True, null=True)
+    paying_to = models.CharField(max_length=50, choices=ConsultationCase.PAYING_TO_CHOICES, blank=True, null=True)
+    payment_status = models.CharField(max_length=50, choices=ConsultationCase.PAYMENT_STATUS_CHOICES, default='Pending')
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    payment_received_date_time = models.DateTimeField(null=True, blank=True)
+    received_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    case_type = models.CharField(max_length=50, choices=ConsultationCase.CASE_TYPE_CHOICES, blank=True, null=True) 
+    preferred_language = models.ForeignKey(MasterLanguage, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    follow_up_date_time = models.DateTimeField(null=True, blank=True)
+    remarks = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Dependent {self.person_name} for Case {self.case.id}"
 
     class Meta:
-        db_table = 'consultation_appointments'
-        ordering = ['appointment_date_time']
+        db_table = 'consultation_case_dependents'
+        ordering = ['created_at']
+
+class ConsultationCaseDocument(BaseModel):
+    case = models.ForeignKey(ConsultationCase, on_delete=models.CASCADE, related_name='documents')
+    document_file = models.FileField(upload_to='consultation/documents/')
+    document_name = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Document for Case {self.case.id}: {self.document_name or self.document_file.name}"
+
+    class Meta:
+        db_table = 'consultation_case_documents'
+        ordering = ['created_at']

@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='careprogramcase',
-            name='customer_dependant',
+            name='customer_dependent',
         ),
         migrations.AddField(
             model_name='careprogramcase',

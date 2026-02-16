@@ -78,19 +78,19 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
                     "relationship_person_id": "Relationship person is required."
                 })
 
-            dependant = ClientCustomerDependent.objects.filter(
+            dependent = ClientCustomerDependent.objects.filter(
                 id=relationship_person_id,
                 customer=employee,
                 relationship=case_for
             ).first()
 
-            if not dependant:
+            if not dependent:
                 raise serializers.ValidationError(
                     "Invalid relationship person selected."
                 )
 
             if 'customer_name' not in initial:
-                data['customer_name'] = dependant.name
+                data['customer_name'] = dependent.name
 
             required_fields=[
                 'mobile_number',
@@ -103,7 +103,7 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
             for field in required_fields:
                 if field not in initial:
                     raise serializers.ValidationError({
-                        field: "This field is required for dependant case."
+                        field: "This field is required for dependent case."
                     })
                 
 

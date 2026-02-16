@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 ('client', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='client.client')),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='%(class)s_created', to=settings.AUTH_USER_MODEL)),
                 ('customer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='client_customer.clientcustomer')),
-                ('customer_dependant', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='client_customer.clientcustomerdependent')),
+                ('customer_dependent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='client_customer.clientcustomerdependent')),
                 ('employee', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='employee_cases', to='client_customer.clientcustomer')),
                 ('state', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='master_management.state')),
                 ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='%(class)s_updated', to=settings.AUTH_USER_MODEL)),

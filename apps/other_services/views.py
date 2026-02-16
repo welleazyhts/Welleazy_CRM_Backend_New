@@ -496,7 +496,7 @@ class EyeTreatmentCaseViewSet(ModelViewSet):
         if relationship.name.lower() == 'self':
             return response([])
 
-        dependants = ClientCustomerDependent.objects.filter(
+        dependents = ClientCustomerDependent.objects.filter(
             customer_id=employee_id,
             relationship_id=case_for_id
         )
@@ -505,7 +505,7 @@ class EyeTreatmentCaseViewSet(ModelViewSet):
             {
                 "id": d.id,
                 "name": d.name
-            } for d in dependants
+            } for d in dependents
         ])
     
 
@@ -555,12 +555,12 @@ class DentalTreatmentCaseViewSet(ModelViewSet):
         if relationship.name.lower() == 'self':
             return response([])
 
-        dependants = ClientCustomerDependent.objects.filter(
+        dependents = ClientCustomerDependent.objects.filter(
             customer_id=employee_id,
             relationship_id=case_for_id
         )
 
-        return response([{"id": d.id, "name": d.name} for d in dependants])
+        return response([{"id": d.id, "name": d.name} for d in dependents])
 
     @action(detail=False, methods=['get'], url_path='dental-treatments')
     def dental_treatments(self, request):

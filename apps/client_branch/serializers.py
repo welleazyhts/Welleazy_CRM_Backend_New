@@ -20,3 +20,15 @@ class ClientBranchSerializer(serializers.ModelSerializer):
             'is_active', 'created_at', 'updated_at',
             'created_by', 'created_by_name', 'updated_by', 'updated_by_name'
         ]
+
+    def validate(self, attrs):
+        city = attrs.get('city')
+        state = attrs.get('state')
+        
+        # Validate city belongs to state
+        if city and state and city.state != state:
+            raise serializers.ValidationError({
+                "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."
+            })
+        
+        return attrs

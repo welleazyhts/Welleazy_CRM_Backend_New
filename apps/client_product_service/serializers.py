@@ -30,3 +30,32 @@ class ClientProductServiceSerializer(serializers.ModelSerializer):
             {'id': service.id, 'name': service.name} 
             for service in obj.services.all()
         ]
+
+    def validate(self, attrs):
+        client = attrs.get('client')
+        branch = attrs.get('branch')
+        product = attrs.get('product')
+        services = attrs.get('services', [])
+        
+        if branch and client and branch.client != client:
+            raise serializers.ValidationError({
+                "branch": f"The selected branch '{branch.branch_name}' does not belong to the client '{client.corporate_name}'."
+            })
+        
+        if services and product:
+            from apps.master_management.models import ServiceMapping
+            
+            mapping = ServiceMapping.objects.filter(product=product).first()
+            if not mapping:
+                raise serializers.ValidationError({
+                    "product": f"No service mapping found for product '{product.name}'."
+                })
+            
+            valid_service_ids = set(mapping.sub_products.values_list('id', flat=True))
+            for service in services:
+                if service.id not in valid_service_ids:
+                    raise serializers.ValidationError({
+                        "services": f"The service '{service.name}' is not mapped to product '{product.name}'."
+                    })
+        
+        return attrs

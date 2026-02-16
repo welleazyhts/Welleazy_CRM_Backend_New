@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ConsultationCase, ConsultationAppointment
+from .models import ConsultationCase, ConsultationDoctorDetails, ConsultationCaseDependent, ConsultationCaseDocument
 from apps.master_management.models import MasterProduct, MasterProductSubCategory, MasterBranch, State, City, MasterLanguage, MasterRelationship, CaseStatus, MasterSpecialtiesTest
 from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
@@ -7,11 +7,29 @@ from apps.accounts.models import User
 from apps.doctor.models import Doctor
 from apps.client_product_service.models import ClientProductService
 
-class ConsultationAppointmentSerializer(serializers.ModelSerializer):
+class ConsultationDoctorDetailsSerializer(serializers.ModelSerializer):
     doctor_name = serializers.CharField(source='doctor.doctor_name', read_only=True)
+    preferred_language_name = serializers.CharField(source='preferred_language.name', read_only=True)
+    case_status_name = serializers.CharField(source='case_status.name', read_only=True)
 
     class Meta:
-        model = ConsultationAppointment
+        model = ConsultationDoctorDetails
+        fields = '__all__'
+        read_only_fields = ('case',)
+
+class ConsultationCaseDependentSerializer(serializers.ModelSerializer):
+    relationship_name = serializers.CharField(source='relationship.name', read_only=True)
+    preferred_language_name = serializers.CharField(source='preferred_language.name', read_only=True)
+
+    class Meta:
+        model = ConsultationCaseDependent
+        fields = '__all__'
+        read_only_fields = ('case',)
+
+class ConsultationCaseDocumentSerializer(serializers.ModelSerializer):
+    document_file = serializers.FileField(required=False)
+    class Meta:
+        model = ConsultationCaseDocument
         fields = '__all__'
         read_only_fields = ('case',)
 
@@ -25,23 +43,25 @@ class ConsultationCaseSerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='state.name', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
     preferred_language_name = serializers.CharField(source='preferred_language.name', read_only=True)
-    sponsor_status_name = serializers.CharField(source='sponsor_status.name', read_only=True)
     case_status_name = serializers.CharField(source='case_status.name', read_only=True)
     created_by_name = serializers.CharField(source='created_by.name', read_only=True)
     updated_by_name = serializers.CharField(source='updated_by.name', read_only=True)
-    appointments = ConsultationAppointmentSerializer(many=True, read_only=True)
+    doctor_details = ConsultationDoctorDetailsSerializer(many=True, read_only=True)
+    dependents = ConsultationCaseDependentSerializer(many=True, read_only=True)
+    documents = ConsultationCaseDocumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = ConsultationCase
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
+        read_only_fields = ('case_id', 'created_at', 'updated_at', 'created_by', 'updated_by')
 
 class ConsultationCasePayloadSerializer(serializers.ModelSerializer):
-    appointments = ConsultationAppointmentSerializer(many=True, required=False)
+    dependents = ConsultationCaseDependentSerializer(many=True, required=False)
+    documents = ConsultationCaseDocumentSerializer(many=True, read_only=True)
     class Meta:
         model = ConsultationCase
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at', 'created_by', 'updated_by')
+        read_only_fields = ('case_id', 'created_at', 'updated_at', 'created_by', 'updated_by')
 
     def validate(self, attrs):
         
@@ -50,7 +70,6 @@ class ConsultationCasePayloadSerializer(serializers.ModelSerializer):
         client = attrs.get('corporate_name')
         branch = attrs.get('branch_name')
         
-        # Validate branch belongs to client
         if branch and client and branch.client != client:
             raise serializers.ValidationError({
                 "branch_name": f"The selected branch '{branch.branch_name}' does not belong to the client '{client.corporate_name}'."
@@ -102,9 +121,18 @@ class ConsultationCasePayloadSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('appointments', None)
+        validated_data.pop('dependents', None)
+        validated_data.pop('documents', None)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        validated_data.pop('appointments', None)
+        validated_data.pop('dependents', None)
+        validated_data.pop('documents', None)
         return super().update(instance, validated_data)
+
+
+class ConsultationDoctorDetailsPayloadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsultationDoctorDetails
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']

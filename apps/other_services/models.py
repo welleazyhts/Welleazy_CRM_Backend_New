@@ -298,7 +298,7 @@ class EyeTreatmentCase(BaseModel):
         on_delete=models.PROTECT
     )
 
-    # Store dependant only when not SELF
+    # Store dependent only when not SELF
     relationship_person = models.ForeignKey(
         ClientCustomerDependent,
         on_delete=models.PROTECT,

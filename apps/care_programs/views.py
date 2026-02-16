@@ -39,7 +39,7 @@ class CareProgramCaseViewSet(ModelViewSet):
         if relationship.name.lower() == 'self':
             return Response([])
 
-        dependants = ClientCustomerDependent.objects.filter(
+        dependents = ClientCustomerDependent.objects.filter(
             customer_id=employee_id,
             relationship_id=case_for_id
         )
@@ -48,7 +48,7 @@ class CareProgramCaseViewSet(ModelViewSet):
             {
                 "id": d.id,
                 "name": d.name
-            } for d in dependants
+            } for d in dependents
         ])
     
 

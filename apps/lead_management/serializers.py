@@ -84,24 +84,24 @@ class IndividualClientSerializer(serializers.ModelSerializer):
 
 
 # Payload Serializers for Workflow Pattern
-class IndividualClientDependentPayloadSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
-    name = serializers.CharField(required=True)
+class IndividualClientDependentPayloadSerializer(serializers.ModelSerializer):
     relationship = serializers.PrimaryKeyRelatedField(
         queryset=MasterRelationship.objects.all(), 
         required=False, 
         allow_null=True
     )
-    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False, allow_null=True)
-    email_id = serializers.EmailField(required=False, allow_null=True, allow_blank=True)
-    age = serializers.IntegerField(required=False, allow_null=True)
+    class Meta:
+        model = IndividualClientDependent
+        fields = ['id', 'name', 'relationship', 'gender', 'email_id', 'age']
 
 
-class IndividualClientDocumentPayloadSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
+class IndividualClientDocumentPayloadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IndividualClientDocument
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by', 'individual_client']
 
-
-class IndividualClientPayloadSerializer(serializers.Serializer):
+class IndividualClientPayloadSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(required=True)
     employee_id = serializers.CharField(required=True)
     contact_no = serializers.CharField(required=True)
@@ -132,3 +132,30 @@ class IndividualClientPayloadSerializer(serializers.Serializer):
     
     dependents = IndividualClientDependentPayloadSerializer(many=True, required=False)
     documents = IndividualClientDocumentPayloadSerializer(many=True, required=False)
+
+    class Meta:
+        model = IndividualClient
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
+
+    def validate(self, attrs):
+        city = attrs.get('city')
+        state = attrs.get('state')
+        
+        # Validate city belongs to state
+        if city and state and city.state != state:
+            raise serializers.ValidationError({
+                "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."
+            })
+        
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('dependents', None)
+        validated_data.pop('documents', None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('dependents', None)
+        validated_data.pop('documents', None)
+        return super().update(instance, validated_data)

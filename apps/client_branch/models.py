@@ -3,8 +3,6 @@ from apps.core.models import BaseModel
 from apps.client.models import Client
 from apps.client_masters.models import BranchZone
 from apps.master_management.models import State, City
-# from apps.master_management.models import MasterLoginType
-
 class ClientBranch(BaseModel):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='branches')
     # login_type = models.ForeignKey(MasterLoginType, on_delete=models.SET_NULL, null=True, blank=True)

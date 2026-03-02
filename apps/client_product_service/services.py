@@ -88,7 +88,6 @@ class ClientProductServiceService:
                     else:
                         stats["unchanged"] += 1
                     
-                    # Cleanup duplicates
                     if existing_qs.count() > 1:
                         existing_qs.exclude(id=instance.id).delete()
                 else:

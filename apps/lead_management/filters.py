@@ -1,15 +1,11 @@
 import django_filters
 from .models import Lead, IndividualClient
 
-
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
     pass
 
-
 class CharInFilter(django_filters.BaseInFilter, django_filters.CharFilter):
     pass
-
-
 class LeadFilter(django_filters.FilterSet):
     
     lead_source = NumberInFilter(field_name="lead_source__id", lookup_expr='in')

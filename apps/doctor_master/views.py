@@ -1,14 +1,8 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-
 from rest_framework.viewsets import ModelViewSet
 from .models import *
 from .serializers import *
 from rest_framework.permissions import IsAdminUser
-
-
 
 class EmpanelForViewSet(ModelViewSet):
     queryset = EmpanelFor.objects.all()
@@ -44,8 +38,6 @@ class MeetLocationViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
 
 class DocumentTypeViewSet(ModelViewSet):
     queryset = DocumentType.objects.all()

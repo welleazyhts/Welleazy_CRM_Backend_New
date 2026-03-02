@@ -25,7 +25,6 @@ class ClientBranchSerializer(serializers.ModelSerializer):
         city = attrs.get('city')
         state = attrs.get('state')
         
-        # Validate city belongs to state
         if city and state and city.state != state:
             raise serializers.ValidationError({
                 "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."

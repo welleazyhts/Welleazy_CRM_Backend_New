@@ -26,9 +26,6 @@ class CareProgram(BaseModel):
     def __str__(self):
         return self.care_program_name
 
-
-# EYE & DENTAL TREATMENTS CREATION-----
-
 class EyeDentalTreatment(BaseModel):
     TREATMENT_TYPE_CHOICES = (
         ("Eye", "Eye"),
@@ -44,10 +41,6 @@ class EyeDentalTreatment(BaseModel):
 
     def __str__(self):
         return f"{self.get_treatment_type_display()} - {self.treatment_name}"
-
-
-# ADD CAMP MODEL----
-
 
 class MedicalCamp(BaseModel):
     CAMP_STATUS_CHOICES = (
@@ -83,7 +76,6 @@ class MedicalCamp(BaseModel):
         TestPackage, on_delete=models.PROTECT
     )
 
-    # Tests under that package (snapshot for this camp)
     tests = models.ForeignKey(Test, on_delete=models.CASCADE, blank=True, null=True)
 
     camp_datetime = models.DateTimeField()
@@ -132,9 +124,7 @@ class MedicalCamp(BaseModel):
                 num = last_id.id + 1
             else:
                 num = 1
-            self.camp_id = f"CAMP{num:04d}"  # CAMP00001
-
-        # If completed, keep completed_medical_count, else reset or keep as is
+            self.camp_id = f"CAMP{num:04d}"  
         if self.camp_status != "Completed":
             self.completed_medical_count = 0
 
@@ -142,12 +132,6 @@ class MedicalCamp(BaseModel):
 
     def __str__(self):
         return self.camp_id
-
-
-# CASE MODEL-----
-
-
-
 
 class CampCase(BaseModel):
     case_id = models.CharField(max_length=20, unique=True, editable=False)
@@ -167,13 +151,11 @@ class CampCase(BaseModel):
    
 
     def save(self, *args, **kwargs):
-        # Auto-generate case_id: WXC00001
         if not self.case_id:
             last = CampCase.objects.order_by("id").last()
             num = last.id + 1 if last else 1
             self.case_id = f"WXC{num:05d}"
 
-        # Auto-generate customer_id: CNR01
         if not self.customer_id:
             last = CampCase.objects.order_by("id").last()
             num = last.id + 1 if last else 1
@@ -183,11 +165,6 @@ class CampCase(BaseModel):
 
     def __str__(self):
         return self.case_id
-
-
-# COMPREHENSIVE HEALTH PLANS------
-
-
 class CHP(BaseModel):
     CATEGORY_CHOICES = (
         ("NA", "NA"),
@@ -207,7 +184,6 @@ class CHP(BaseModel):
 
     package = models.ForeignKey(TestPackage, on_delete=models.PROTECT)
 
-    # These two are choices now
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="NA")
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default="NA")
 
@@ -226,21 +202,12 @@ class CHP(BaseModel):
         return f"{self.package} - {self.product}"
 
 
-
-# OHC MASTER TABLE-----
-
-
 class TypeOfOHC(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
-    
-
-# OHC MAIN TABLE------
-
-
 class OHC(BaseModel):
     type_of_ohc = models.ForeignKey(TypeOfOHC, on_delete=models.PROTECT)
     client = models.ForeignKey(Client, on_delete=models.PROTECT)
@@ -255,7 +222,6 @@ class OHC(BaseModel):
     spoc_email = models.EmailField(blank=True)
     spoc_mobile = models.CharField(max_length=20, blank=True)
 
-    # Date + Time
     service_start_date = models.DateTimeField(null=True, blank=True)
     agreement_date = models.DateTimeField(null=True, blank=True)
     relationship_end_date = models.DateTimeField(null=True, blank=True)
@@ -265,19 +231,13 @@ class OHC(BaseModel):
     client_bill_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     service_provider_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
-    # These two:
     doctor_qualifications = models.CharField(max_length=255, blank=True)
     doctor_certificate_link = models.URLField(blank=True)
 
     remarks = models.TextField(blank=True)
 
-   
-
     def __str__(self):
         return f"{self.client} - {self.type_of_ohc}"
-
-
-# EYE PROCEDURE MODULE------
 
 
 class EyeTreatmentCase(BaseModel):
@@ -297,8 +257,6 @@ class EyeTreatmentCase(BaseModel):
         MasterRelationship,
         on_delete=models.PROTECT
     )
-
-    # Store dependent only when not SELF
     relationship_person = models.ForeignKey(
         ClientCustomerDependent,
         on_delete=models.PROTECT,
@@ -306,8 +264,6 @@ class EyeTreatmentCase(BaseModel):
         blank=True,
         related_name='eye_treatment_cases'
     )
-
-    # Single, stored name (auto-prefilled but editable)
     customer_name = models.CharField(max_length=255)
 
     mobile_number = models.CharField(max_length=15)
@@ -342,10 +298,6 @@ class EyeTreatmentCase(BaseModel):
             super().save(update_fields=['case_id'])
 
 
-# DENTAL PROCEDURE MODULE------
-
-
-
 class DentalTreatmentCase(BaseModel):
     case_id = models.CharField(max_length=20, unique=True, editable=False)
 
@@ -359,8 +311,6 @@ class DentalTreatmentCase(BaseModel):
     )
 
     case_for = models.ForeignKey(MasterRelationship, on_delete=models.PROTECT)
-
-    # Only when not SELF
     relationship_person = models.ForeignKey(
         ClientCustomerDependent,
         on_delete=models.PROTECT,
@@ -378,16 +328,12 @@ class DentalTreatmentCase(BaseModel):
     city = models.ForeignKey(City, on_delete=models.PROTECT)
 
     address = models.TextField(blank=True, null=True)
-
-    # Same master table as Eye, but filtered by type in serializer/view
     dental_treatment = models.ForeignKey(EyeDentalTreatment, on_delete=models.PROTECT)
 
     case_status = models.ForeignKey(CaseStatus, on_delete=models.PROTECT)
 
     comment = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
-
-
  
 
     def save(self, *args, **kwargs):

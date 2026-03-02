@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-
 from django.db import models
 from apps.test_management_master.models import TestType , HealthConcernType
 from apps.client.models import Client
@@ -9,8 +6,6 @@ from apps.master_management.models import City , MasterVisitType
 from apps.core.models import BaseModel
 
 class IndividualTest(BaseModel):
-
-   
     COMPLIMENTARY_CHOICES = (
         ("Complimentary", "Complimentary"),
         ("TBA", "TBA"),

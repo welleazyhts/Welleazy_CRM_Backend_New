@@ -9,23 +9,19 @@ from apps.client_masters.models import (
 from apps.master_management.models import MasterLoginType
 
 class Client(BaseModel):
-    # Business Info
     login_type = models.ForeignKey(MasterLoginType, on_delete=models.SET_NULL, null=True, blank=True)
     business_type = models.ForeignKey(BusinessType, on_delete=models.SET_NULL, null=True, blank=True)
     corporate_code = models.CharField(max_length=100, blank=True, null=True, unique=True)
     corporate_name = models.CharField(max_length=255)
     corporate_type = models.ForeignKey(CorporateType, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Contact Info
     mobile_no = models.CharField(max_length=20)
     landline_no = models.CharField(max_length=20, blank=True, null=True)
     email_id = models.EmailField()
     
-    # Address Info
     head_office_address = models.TextField(blank=True, null=True)
-    branch_office_address = models.TextField(blank=True, null=True) # Can be JSON or comma separated
+    branch_office_address = models.TextField(blank=True, null=True) 
     
-    # Sales/Ops Info
     source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True, blank=True)
     referred_by = models.CharField(max_length=255, blank=True, null=True)
     welleazy_crm = models.ForeignKey(WelleazyCRM, on_delete=models.SET_NULL, null=True, blank=True)
@@ -34,21 +30,18 @@ class Client(BaseModel):
     broker = models.CharField(max_length=255, blank=True, null=True)
     ops_spoc = models.CharField(max_length=255, blank=True, null=True)
     
-    # Financial/Legal Info
     service_charges = models.CharField(max_length=255, blank=True, null=True)
     pan_no = models.CharField(max_length=50, blank=True, null=True)
     gst_no = models.CharField(max_length=50, blank=True, null=True)
     home_visit_charges = models.CharField(max_length=255, blank=True, null=True)
     account_id = models.CharField(max_length=100, blank=True, null=True)
     
-    # Other Info
     channel_partner_id = models.CharField(max_length=100, blank=True, null=True)
     website_url = models.URLField(blank=True, null=True)
     billing_email_address = models.EmailField(blank=True, null=True)
     
-    is_active = models.BooleanField(default=True) # Active/Inactive toggle
+    is_active = models.BooleanField(default=True)
     
-    # Sponsorship Info
     total_sponsored = models.CharField(max_length=255, blank=True, null=True)
     total_non_sponsored = models.CharField(max_length=255, blank=True, null=True)
     is_dependent_sponsored = models.BooleanField(default=False)
@@ -57,14 +50,11 @@ class Client(BaseModel):
     case_registration_mail_auto_triggered = models.BooleanField(default=False)
     separate_access = models.BooleanField(default=False)
     
-    # Visit/Partnership
     visit_type = models.ForeignKey(VisitType, on_delete=models.SET_NULL, null=True, blank=True)
     corporate_partnership_status = models.ForeignKey(PartnershipStatus, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Images
     background_image = models.ImageField(upload_to='client_backgrounds/', blank=True, null=True)
     
-    # Agreement
     client_agreement_from = models.ForeignKey(ClientAgreementFrom, on_delete=models.SET_NULL, null=True, blank=True)
     agreement_date = models.DateField(blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
@@ -76,7 +66,6 @@ class Client(BaseModel):
             if corporate_type:
                 self.login_type = corporate_type
         
-        # Auto-generate corporate_code if not present
         if not self.corporate_code:
             prefix = "WEZY"
             last_client = Client.objects.filter(corporate_code__startswith=prefix).order_by('corporate_code').last()

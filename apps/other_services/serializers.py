@@ -22,9 +22,6 @@ class CareProgramSerializer(serializers.ModelSerializer):
             'deleted_at'
         ]
 
-
-# EYE & DENTAL TREATMENTS SERIALIZER-----
-
 class EyeDentalTreatmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = EyeDentalTreatment
@@ -40,10 +37,6 @@ class EyeDentalTreatmentSerializer(serializers.ModelSerializer):
             "updated_by",
             "deleted_at",
         ]
-
-
-# MEDICAL CAMP SERIALIZER-----
-
 
 class MedicalCampSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source="main_client.corporate_name", read_only=True)
@@ -87,12 +80,9 @@ class MedicalCampSerializer(serializers.ModelSerializer):
         if not package:
             raise serializers.ValidationError("Package is required.")
             
-         # Package must belong to client
         if package and package.client_id != main_client.id:
             raise serializers.ValidationError("Selected package does not belong to the selected client.")
 
-        # ✅ Test must belong to the selected package
-        # Since Package has test_ids (M2M or reverse FK)
         if not package.tests_included.filter(id=test.id).exists():
             raise serializers.ValidationError("Selected test does not belong to the selected package.")
         
@@ -109,17 +99,11 @@ class MedicalCampSerializer(serializers.ModelSerializer):
 
         return attrs
 
-
-# ADD CASE SERIALIZERS-----
-
-
 class CampCaseSerializer(serializers.ModelSerializer):
-    # Existing auto fields
     case__id = serializers.CharField(source="case_id", read_only=True)
     customer__id = serializers.CharField(source="customer_id", read_only=True)
     updated_by_name=serializers.CharField(source="updated_by.name", read_only=True)
 
-    # ✅ Fields from MedicalCamp
     camp_id = serializers.CharField(source="camp.camp_id", read_only=True)
     client_name = serializers.CharField(source="camp.main_client.corporate_name", read_only=True)
     sub_client_name = serializers.CharField(source="camp.sub_client.name", read_only=True)
@@ -127,16 +111,12 @@ class CampCaseSerializer(serializers.ModelSerializer):
     city_name = serializers.CharField(source="camp.camp_city.name", read_only=True)
 
 
-    # Optional: names for FK fields in Case
     status_name = serializers.CharField(source="case_status.name", read_only=True)
 
     class Meta:
         model = CampCase
         fields = "__all__"
         read_only_fields = ("case_id", "customer_id", "created_at")
-
-
-# COMPREHENSIVE HEALTH PLANS SERIALIZER-----
 
 class CHPSerializer(serializers.ModelSerializer):
     package_name = serializers.CharField(source="package.package_name", read_only=True)
@@ -151,7 +131,6 @@ class CHPSerializer(serializers.ModelSerializer):
         product = attrs.get("product")
         service = attrs.get("service")
 
-        # ✅ Check mapping: product must have this service in sub_products
         mapping = ServiceMapping.objects.filter(product=product).first()
 
         if not mapping:
@@ -165,15 +144,11 @@ class CHPSerializer(serializers.ModelSerializer):
         return attrs
     
 
-# OHC MASTER SERIALIZERS-------
 
 class TypeOfOHCSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeOfOHC
         fields = "__all__"
-
-# OHC MAIN SERIALIZERS-------
-
 
 class OHCSerializer(serializers.ModelSerializer):
     type_of_ohc_name = serializers.CharField(source="type_of_ohc.name", read_only=True)
@@ -187,10 +162,6 @@ class OHCSerializer(serializers.ModelSerializer):
         model = OHC
         fields = "__all__"
         read_only_fields = ("doctor_qualifications",)
-
-
-# EYE PROCEDURE SERIALIZER-------
-
 
 class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
 
@@ -241,15 +212,11 @@ class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
         employee = data['employee']
         initial=self.initial_data
 
-        # -------------------
-        # SELF CASE
-        # -------------------
         if case_for.name.lower() == 'self':
             data['relationship_person'] = None
             if 'customer_name' not in initial:
                 data['customer_name'] = employee.customer_name
 
-            # editable fields with fallback
                 data['mobile_number'] = initial.get('mobile_number', employee.mobile_no)
                 data['email_id'] = initial.get('email_id', employee.email_id)
                 data['address'] = initial.get('address', employee.area_locality)
@@ -263,9 +230,6 @@ class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
             else:
                 data['city'] = City.objects.get(id=initial['city'])
 
-        # -------------------
-        # RELATION CASE
-        # -------------------
         else:
             relationship_person_id = initial.get('relationship_person_id')
 
@@ -307,10 +271,6 @@ class EyeTreatmentCaseSerializer(serializers.ModelSerializer):
             data['city'] = City.objects.get(id=initial['city'])
 
         return data
-    
-
-# DENTAL PROCEDURE SERIALIZER-------
-
 
 class DentalTreatmentCaseSerializer(serializers.ModelSerializer):
     relationship_person_id = serializers.IntegerField(write_only=True, required=False)
@@ -347,7 +307,6 @@ class DentalTreatmentCaseSerializer(serializers.ModelSerializer):
         employee = data['employee']
         initial = self.initial_data
 
-        # SELF
         if case_for.name.lower() == 'self':
             data['relationship_person'] = None
 
@@ -368,7 +327,6 @@ class DentalTreatmentCaseSerializer(serializers.ModelSerializer):
             else:
                 data['city'] = City.objects.get(id=initial['city'])
 
-        # dependent
         else:
             relationship_person_id = initial.get('relationship_person_id')
             if not relationship_person_id:

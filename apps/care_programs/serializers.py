@@ -44,16 +44,11 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
         case_for = data['case_for']
         employee = data['employee']
         initial=self.initial_data
-
-        # -------------------
-        # SELF CASE
-        # -------------------
         if case_for.name.lower() == 'self':
             data['relationship_person'] = None
             if 'customer_name' not in initial:
                 data['customer_name'] = employee.customer_name
 
-            # editable fields with fallback
                 data['mobile_number'] = initial.get('mobile_number', employee.mobile_no)
                 data['email_id'] = initial.get('email_id', employee.email_id)
                 data['address'] = initial.get('address', employee.area_locality)
@@ -66,10 +61,6 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
                 data['city'] = employee.city
             else:
                 data['city'] = City.objects.get(id=initial['city'])
-
-        # -------------------
-        # RELATION CASE
-        # -------------------
         else:
             relationship_person_id = initial.get('relationship_person_id')
 
@@ -105,7 +96,6 @@ class CareProgramCaseSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({
                         field: "This field is required for dependent case."
                     })
-                
 
             data['state'] = State.objects.get(id=initial['state'])
             data['city'] = City.objects.get(id=initial['city'])

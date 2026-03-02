@@ -2,25 +2,17 @@ from rest_framework import serializers
 from .models import SecondOpinionCase
 from apps.client.models import Client
 from apps.client_customer.models import ClientCustomer
-
-
-# Custom field to accept both numeric IDs and string values
 class FlexibleChoiceField(serializers.CharField):
     def __init__(self, id_map, **kwargs):
         self.id_map = id_map
         super().__init__(**kwargs)
     
     def to_internal_value(self, data):
-        # Convert to string first
         data = str(data) if data is not None else data
-        # If it's a numeric ID, convert to the string value
         if data in self.id_map:
             data = self.id_map[data]
         return super().to_internal_value(data)
-
-
 class SecondOpinionCaseSerializer(serializers.ModelSerializer):
-    # ID to String mappings
     CASE_TYPE_MAP = {
         '1': 'Interpretation',
         '2': 'Digitization',
@@ -38,7 +30,6 @@ class SecondOpinionCaseSerializer(serializers.ModelSerializer):
         '2': 'TMT',
     }
     
-    # Override fields to use custom field class
     case_type = FlexibleChoiceField(id_map=CASE_TYPE_MAP)
     case_received_mode = FlexibleChoiceField(id_map=MODE_MAP, required=False, allow_null=True, allow_blank=True)
     interpretation_type = FlexibleChoiceField(id_map=INTERPRETATION_MAP, required=False, allow_null=True, allow_blank=True)
@@ -77,8 +68,6 @@ class SecondOpinionCaseSerializer(serializers.ModelSerializer):
             'remark': {'required': False},
             'report_file': {'required': False},
         }
-
-
 class SecondOpinionCaseResponseSerializer(serializers.ModelSerializer):
     """Lightweight serializer for API responses"""
     class Meta:
@@ -97,9 +86,7 @@ class SecondOpinionCaseResponseSerializer(serializers.ModelSerializer):
             "case_status",
             "created_at",
         ]
-        read_only_fields = fields  # All fields are read-only in response
-
-        
+        read_only_fields = fields
 
 class SecondOpinionCaseListSerializer(SecondOpinionCaseSerializer):
     client_name = serializers.CharField(source='client.corporate_name', read_only=True)
@@ -109,7 +96,6 @@ class SecondOpinionCaseListSerializer(SecondOpinionCaseSerializer):
     
     class Meta(SecondOpinionCaseSerializer.Meta):
         fields = SecondOpinionCaseSerializer.Meta.fields + ['client_name', 'doctor_name', 'qc_executive_name', 'interpretation_assign_date']
-
 
 class SecondOpinionBulkUploadSerializer(serializers.Serializer):
     file = serializers.FileField()

@@ -46,4 +46,3 @@ class BranchZone(MasterBase):
 
 class EmailNotificationType(MasterBase):
     pass
-

@@ -1,13 +1,8 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-
 from .models import *
 from .serializers import ServiceProviderSerializer , ProviderDocumentSerializer , ProviderRegistrationLinkSerializer , DiscountListSerializer, VoucherListSerializer
 from apps.master_management.models import MasterTypeOfProvider
@@ -17,36 +12,22 @@ from rest_framework.permissions import IsAdminUser
 from django.core.mail import send_mail
 from django.conf import settings
 from twilio.rest import Client
-
 from apps.service_provider.models import ServiceProvider, ProviderRegistrationLink
-
-
-
 from rest_framework.generics import ListAPIView
 from django.db.models import Q
-
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from django.http import HttpResponse
 import csv
 from openpyxl import Workbook
 
-
- 
-
-
-
-
 class ServiceProviderViewSet(ModelViewSet):
     queryset = ServiceProvider.objects.all()
     serializer_class = ServiceProviderSerializer
     permission_classes = [IsAdminUser]
 
-    # ---------------- CREATE ----------------
     def create(self, request, *args, **kwargs):
         data = request.data
-
-       
 
         with transaction.atomic():
             provider = ServiceProvider.objects.create(
@@ -72,7 +53,6 @@ class ServiceProviderViewSet(ModelViewSet):
                 visit_type_id=data["visit_type"],
                 vendor_registration_name=data.get("vendor_registration_name"),
                 dc_unique_name_id=data["dc_unique_name"],
-                # payment_term_id=data.get("payment_term"),
                 mou_signed=data["mou_signed"],
                 mou_received_date=data.get("mou_received_date"),
                 remarks=data.get("remarks"),
@@ -85,7 +65,6 @@ class ServiceProviderViewSet(ModelViewSet):
             provider.client_company.set(data.get("client_company", []))
             provider.medical_specialties.set(data.get("medical_specialties", []))
 
-             # ---- BUSINESS RULE ----
             if "corporate_group"=="Yes" and not data.get("corporate_companies"):
                 return Response(
                 {"corporate_companies": "Required when corporate_group is Yes"},
@@ -150,7 +129,7 @@ class ServiceProviderViewSet(ModelViewSet):
                 ProviderDiscount.objects.create(
                 provider=provider,
                 discount_service_id=discount_service_id,
-                discount_type=discount_service.name,   # ✅ AUTO-FILL
+                discount_type=discount_service.name,  
                 created_by=request.user,
                 updated_by=request.user,
                  **d
@@ -174,7 +153,7 @@ class ServiceProviderViewSet(ModelViewSet):
                 ProviderVoucher.objects.create(
                     provider=provider,
                     voucher_discount_id=voucher_discount_id,
-                    voucher_discount_type=voucher_discount.name,   # ✅ AUTO-FILL
+                    voucher_discount_type=voucher_discount.name, 
                     created_by=request.user,
                     updated_by=request.user,
                     **v
@@ -183,10 +162,7 @@ class ServiceProviderViewSet(ModelViewSet):
         return Response(
             ServiceProviderSerializer(provider).data,
             status=status.HTTP_201_CREATED
-        )
-
-    # ---------------- UPDATE ----------------
-    
+        )    
 
     @transaction.atomic
     def update(self, request, *args, **kwargs):
@@ -201,10 +177,6 @@ class ServiceProviderViewSet(ModelViewSet):
                 {"corporate_companies": "Required when corporate_group is Yes"},
                 status=400
             )   
-
-    # -----------------------------------
-    # 1. SIMPLE FIELDS
-    # -----------------------------------
         simple_fields = [
         "center_name", "email", "mobile", "landline", "std_code", "fax",
         "plot_no", "address", "area", "pin_code", "service_pin_code",
@@ -222,10 +194,6 @@ class ServiceProviderViewSet(ModelViewSet):
 
         instance.updated_by = user
         instance.save()
-
-    # -----------------------------------
-    # 2. MANY TO MANY
-    # -----------------------------------
         if "client_company" in data:
             instance.client_company.set(data["client_company"])
 
@@ -237,10 +205,6 @@ class ServiceProviderViewSet(ModelViewSet):
                 instance.corporate_companies.set(data["corporate_companies"])
         else:
             instance.corporate_companies.clear()
-
-    # -----------------------------------
-    # 3. ONE TO ONE TABLES
-    # -----------------------------------
         if "manpower" in data:
             ProviderManpower.objects.update_or_create(
                 provider=instance,
@@ -263,10 +227,6 @@ class ServiceProviderViewSet(ModelViewSet):
             rec_obj.accreditations.set(rec_data.get("accreditations", []))
             rec_obj.updated_by = user
             rec_obj.save()
-
-    # -----------------------------------
-    # 4. SERVICE (ONE TO ONE + M2M)
-    # -----------------------------------
         if "service" in data:
             service_data = data["service"]
             categories = service_data.pop("service_categories", [])
@@ -277,10 +237,6 @@ class ServiceProviderViewSet(ModelViewSet):
             )
             svc.service_categories.set(categories)
             svc.save()
-
-    # -----------------------------------
-    # 5. CHILD TABLE UPSERT LOGIC
-    # -----------------------------------
         def sync_children(model, rows):
             existing = model.objects.filter(provider=instance)
             existing_map = {obj.id: obj for obj in existing}
@@ -290,7 +246,6 @@ class ServiceProviderViewSet(ModelViewSet):
                 row_id = row.pop("id", None)
 
                 if row_id and row_id in existing_map:
-                # UPDATE
                     obj = existing_map[row_id]
                     for field, value in row.items():
                         setattr(obj, field, value)
@@ -298,7 +253,6 @@ class ServiceProviderViewSet(ModelViewSet):
                     obj.save()
                     sent_ids.append(row_id)
                 else:
-                # CREATE
                     obj = model.objects.create(
                         provider=instance,
                         created_by=user,
@@ -307,7 +261,6 @@ class ServiceProviderViewSet(ModelViewSet):
                     )
                     sent_ids.append(obj.id)
 
-        # DELETE REMOVED
             model.objects.filter(provider=instance).exclude(id__in=sent_ids).delete()
 
         if "spocs" in data:
@@ -325,16 +278,9 @@ class ServiceProviderViewSet(ModelViewSet):
         if "vouchers" in data:
             sync_children(ProviderVoucher, data["vouchers"])
 
-    # -----------------------------------
-    # 6. RESPONSE
-    # -----------------------------------
         response_serializer = self.get_serializer(instance)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
-
-
-
-    # ---------------- DELETE ----------------
     def destroy(self, request, *args, **kwargs):
         provider = self.get_object()
         provider.delete()
@@ -342,11 +288,6 @@ class ServiceProviderViewSet(ModelViewSet):
             {"message": "Service Provider deleted successfully"},
             status=status.HTTP_204_NO_CONTENT
         )
-# ---------------- LIST & RETRIEVE are handled by ModelViewSet ----------------
-
-
-# UPLOAD DOCUMENTS VIEWSET-----
-
 
 class ProviderDocumentViewSet(ModelViewSet):
     queryset = ProviderDocuments.objects.select_related("provider")
@@ -364,7 +305,6 @@ class ProviderDocumentViewSet(ModelViewSet):
         except ServiceProvider.DoesNotExist:
             raise ValidationError({"provider": "Invalid provider ID"})
 
-        # Ensure ONE row per provider
         instance, created = ProviderDocuments.objects.get_or_create(
             provider=provider,
             defaults={
@@ -396,12 +336,6 @@ class ProviderDocumentViewSet(ModelViewSet):
 
         return Response(serializer.data)
     
-
-
-# GENERATE THE LINK FOR PROVIDER REGISTRATION------
-
-
-
 class ProviderLinkRequestViewSet(ModelViewSet):
     queryset = ProviderRegistrationLink.objects.all()
     serializer_class = ProviderRegistrationLinkSerializer
@@ -413,7 +347,6 @@ class ProviderLinkRequestViewSet(ModelViewSet):
             updated_by=self.request.user
         )
 
-        # ---------------- EMAIL ----------------
         subject = "Provider Registration Link"
         message = (
             f"Dear {instance.concerned_person_name},\n\n"
@@ -430,7 +363,6 @@ class ProviderLinkRequestViewSet(ModelViewSet):
             fail_silently=False,
         )
 
-        # ---------------- SMS (TWILIO) ----------------
         try:
             client = Client(
                 settings.TWILIO_ACCOUNT_SID,
@@ -453,13 +385,7 @@ class ProviderLinkRequestViewSet(ModelViewSet):
             )
 
         except Exception as e:
-            # Log only — do not break API
             print("Twilio SMS Error:", e)
-
-
-
-# SERVICE PROVIDER FILTER VIEWSET-----
-
 
 class ProviderBaseFilterMixin:
     def apply_filters(self, qs, params):
@@ -508,9 +434,6 @@ class ProviderBaseFilterMixin:
             qs = qs.filter(is_active=is_active.lower() == "true")
 
         return qs.distinct()
-    
-
-
 
 class ProviderFilterListAPI(ProviderBaseFilterMixin, ListAPIView):
     serializer_class = ServiceProviderSerializer
@@ -519,14 +442,6 @@ class ProviderFilterListAPI(ProviderBaseFilterMixin, ListAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         return self.apply_filters(qs, self.request.query_params)
-
-
-
-#   CSV EXPORT OF THE PROVIDER LIST VIEWSET-----
-
-
-
-
 class ProviderExportCSVAPI(ProviderBaseFilterMixin, APIView):
 
     def get(self, request):
@@ -557,20 +472,12 @@ class ProviderExportCSVAPI(ProviderBaseFilterMixin, APIView):
 
         return response
 
-
-
-
-# EXCEL EXPORT OF PROVIDER LIST ------
-
-
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from .models import ServiceProvider
-
-
 class ProviderExportExcelAPI(ProviderBaseFilterMixin, APIView):
 
     def get(self, request):
@@ -607,10 +514,6 @@ class ProviderExportExcelAPI(ProviderBaseFilterMixin, APIView):
         wb.save(response)
         return response
 
-
-
-# SEND LINK TO PROVIDER FILTER----
-
 from rest_framework.generics import ListAPIView
 from apps.service_provider.models import ServiceProvider
 from apps.service_provider.serializers import ServiceProviderSerializer
@@ -639,10 +542,6 @@ class ServiceProviderFilterAPI(ListAPIView):
 
         return qs
 
-
-# SEND LINK FOR PERTICULAR PROVIDER----
-
-
 class SendProviderLinkAPI(APIView):
 
     def post(self, request, provider_id):
@@ -654,9 +553,6 @@ class SendProviderLinkAPI(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # --------------------
-        # Generate unique link
-        # --------------------
         token = uuid.uuid4()
         link = f"https://live.welleazy.com/provider-registration/{token}"
 
@@ -668,9 +564,6 @@ class SendProviderLinkAPI(APIView):
             updated_by=request.user
         )
 
-        # --------------------
-        # Send EMAIL
-        # --------------------
         send_mail(
             subject="Complete Your Provider Registration",
             message=(
@@ -684,9 +577,6 @@ class SendProviderLinkAPI(APIView):
             fail_silently=True,
         )
 
-        # --------------------
-        # Send SMS (Twilio)
-        # --------------------
         sms_status = "sent"
         try:
             client = Client(
@@ -711,11 +601,6 @@ class SendProviderLinkAPI(APIView):
             "sms_status": sms_status,
             "link": link
         }, status=status.HTTP_200_OK)
-
-
-
-# DISCOUNT VIEW-----
-
 
 class DiscountFilterListAPI(ListAPIView):
     serializer_class = DiscountListSerializer
@@ -762,11 +647,6 @@ class DiscountFilterListAPI(ListAPIView):
             )
 
         return qs.distinct()
-
-
-
-# DISCOUNT VIEW CSV EXPORT----
-
 
 
 class DiscountExportCSVAPI(APIView):
@@ -840,11 +720,6 @@ class DiscountExportCSVAPI(APIView):
 
         return response
     
-
-# VOUCHER VIEW FILTER----
-
-
-
 class VoucherFilterListAPI(ListAPIView):
     serializer_class = VoucherListSerializer
 
@@ -878,10 +753,6 @@ class VoucherFilterListAPI(ListAPIView):
 
         return qs.order_by("-id")
     
-
-# VOUCHER VIEW CSV EXPORT----
-
-
 class VoucherExportCSV(APIView):
 
     def get(self, request):

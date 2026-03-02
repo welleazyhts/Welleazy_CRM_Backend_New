@@ -20,11 +20,9 @@ class ClientFilter(filters.FilterSet):
     
     is_active = filters.BooleanFilter()
 
-    # Search in product services
     product = filters.NumberFilter(field_name="product_services__product__id")
     product_name = filters.CharFilter(field_name="product_services__product__name", lookup_expr='icontains')
     services_offered = filters.CharFilter(field_name="product_services__services__name", lookup_expr='icontains')
-
     class Meta:
         model = Client
         fields = [

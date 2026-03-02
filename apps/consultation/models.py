@@ -12,7 +12,6 @@ from apps.doctor.models import Doctor
 from apps.core.choices import GENDER_CHOICES
 
 class ConsultationCase(BaseModel):
-    # Choices
     CASE_REC_MODE_CHOICES = [
         ('Email', 'Email'),
         ('SMS', 'SMS'),

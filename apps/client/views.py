@@ -141,10 +141,6 @@ class ClientViewSet(viewsets.ModelViewSet):
         ClientSPOC.objects.filter(
             client=client
         ).exclude(id__in=keep_ids).delete()
-
-    
-
-
     
     @action(detail=True, methods=["post"], url_path="documents", parser_classes=[MultiPartParser])
     def add_document(self, request, pk=None):
@@ -217,4 +213,3 @@ class ClientViewSet(viewsets.ModelViewSet):
             {"message": "SPOC deleted successfully"},
             status=status.HTTP_200_OK
         )
-    

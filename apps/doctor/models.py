@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-
 import uuid
 from django.db import models
 from apps.doctor_master.models import *
@@ -10,8 +7,6 @@ from apps.core.models import BaseModel
 
 def generate_doctor_id():
     return f"DCWZ{uuid.uuid4().hex[:6].upper()}"
-
-
 class Doctor(BaseModel):
     doctor_id = models.CharField(
         max_length=20,
@@ -46,15 +41,12 @@ class Doctor(BaseModel):
     is_active = models.BooleanField(default=True)
     is_document_pending = models.BooleanField(default=False)
 
-  
-
     def __str__(self):
         return f"{self.doctor_id} - {self.name}"
 
 
 def generate_service_id():
     return uuid.uuid4().hex[:6].upper()
-
 
 class DoctorServicePrice(BaseModel):
     service_id = models.CharField(
@@ -113,8 +105,6 @@ class DoctorDocument(BaseModel):
     )
     document_type = models.ForeignKey(DocumentType, on_delete=models.PROTECT)
     document_file = models.FileField(upload_to='doctor_documents/')
-
-
 
 class DoctorBankDetail(BaseModel):
     doctor = models.OneToOneField(Doctor, on_delete=models.CASCADE, related_name='bank')

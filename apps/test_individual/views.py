@@ -1,7 +1,4 @@
 from django.shortcuts import render
-
-# Create your views here.
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -21,14 +18,12 @@ class IndividualTestViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
 
-        # Extract health concern IDs (list)
         health_concern_ids = data.pop("health_concern_types", [])
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         test = serializer.save(created_by=request.user)
 
-        # Set many-to-many
         if health_concern_ids:
             test.health_concern_types.set(health_concern_ids)
 
@@ -52,7 +47,6 @@ class IndividualTestViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         test = serializer.save(updated_by=request.user)
 
-        # Update many-to-many only if provided
         if health_concern_ids is not None:
             test.health_concern_type.set(health_concern_ids)
 
@@ -61,7 +55,6 @@ class IndividualTestViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        # Clear M2M before delete (good practice)
         instance.health_concern_type.clear()
         instance.delete()
 
@@ -69,10 +62,6 @@ class IndividualTestViewSet(ModelViewSet):
             {"message": "Test deleted successfully"},
             status=status.HTTP_204_NO_CONTENT
         )
-
-
-# FLITERING THE INDIVIDUAL TEST LIST----
-
 
     def get_queryset(self):
         queryset = (

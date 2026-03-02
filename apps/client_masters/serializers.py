@@ -56,4 +56,3 @@ class BranchZoneSerializer(MasterSerializer):
 class EmailNotificationTypeSerializer(MasterSerializer):
     class Meta(MasterSerializer.Meta):
         model = EmailNotificationType
-

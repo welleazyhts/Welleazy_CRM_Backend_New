@@ -5,7 +5,6 @@ from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
 from apps.client_customer.models import ClientCustomer
 from apps.master_management.models import MasterSubPermission
-
 class ClientLogin(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='client_login')
     username = models.CharField(max_length=255, unique=True, null=True, blank=True)

@@ -83,7 +83,6 @@ class IndividualClientSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
 
 
-# Payload Serializers for Workflow Pattern
 class IndividualClientDependentPayloadSerializer(serializers.ModelSerializer):
     relationship = serializers.PrimaryKeyRelatedField(
         queryset=MasterRelationship.objects.all(), 
@@ -142,7 +141,6 @@ class IndividualClientPayloadSerializer(serializers.ModelSerializer):
         city = attrs.get('city')
         state = attrs.get('state')
         
-        # Validate city belongs to state
         if city and state and city.state != state:
             raise serializers.ValidationError({
                 "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."

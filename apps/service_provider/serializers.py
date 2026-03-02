@@ -7,15 +7,10 @@ from .models import (
     ProviderDiscount, ProviderVoucher, DepartmentContact , 
 ProviderDocuments   )
 
-# ------------------------
-# SIMPLE NESTED SERIALIZERS
-# ------------------------
-
 class SPOCSerializer(serializers.ModelSerializer):
     class Meta:
         model = SPOC
         exclude = ("provider",)
-
 
 class DepartmentContactSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(
@@ -23,7 +18,6 @@ class DepartmentContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = DepartmentContact
         exclude = ("provider",)
-
 
 class ProviderRecognitionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,11 +85,6 @@ class ProviderVoucherSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProviderVoucher
         exclude = ("provider",)
-
-
-# ------------------------
-# MAIN SERVICE PROVIDER SERIALIZER (RESPONSE ONLY)
-# ------------------------
 
 class ServiceProviderSerializer(serializers.ModelSerializer):
 
@@ -172,7 +161,6 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
 
         corporate_companies = attrs.get("corporate_companies")
 
-        # ✅ Rule for PAGE-1
         if corporate_group == "Yes":
             if not corporate_companies:
                 raise serializers.ValidationError({
@@ -185,13 +173,7 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
                     "corporate_companies": "Corporate Name must be empty when Corporate Group is No."
                 })
 
-        # ✅ client_company has NO dependency — always allowed
         return attrs
-
-
-# DOCUMENT UPLOAD SERIALIZERS
-
-
 
 ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 ALLOWED_DOC_TYPES = ALLOWED_IMAGE_TYPES + ["application/pdf"]
@@ -213,12 +195,11 @@ class ProviderDocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ["provider"]
 
     def validate_dc_logo(self, value):
-        return validate_file(value, 1)  # 1 MB
+        return validate_file(value, 1) 
 
     def validate_dc_photo(self, value):
-        return validate_file(value, 15)  # 15 MB
+        return validate_file(value, 15)  
 
-    # PDF or image files - 1 MB
     def validate_registration_certificate(self, value):
         return validate_file(value, 1)
 
@@ -242,10 +223,6 @@ class ProviderDocumentSerializer(serializers.ModelSerializer):
 
     def validate_other_document(self, value):
         return validate_file(value, 1)
-    
-
-# GENERATE THE LINK FOR PROVIDER REGISTRATION SERIALIZER------
-
 
 from rest_framework import serializers
 from .models import ProviderRegistrationLink
@@ -269,12 +246,6 @@ class ProviderRegistrationLinkSerializer(serializers.ModelSerializer):
             "created_by",
             "updated_by",
         )
-
-
-
-# DISCOUNT VIEW SERIALIZER----
-
-
 
 class DiscountListSerializer(serializers.ModelSerializer):
     discount_service_name = serializers.CharField(
@@ -305,7 +276,6 @@ class DiscountListSerializer(serializers.ModelSerializer):
         source="provider.status", read_only=True
     )
 
-    # ✅ NEW FIELDS FROM ProviderDocuments
     dc_logo = serializers.SerializerMethodField()
     dc_photo = serializers.SerializerMethodField()
 
@@ -338,11 +308,6 @@ class DiscountListSerializer(serializers.ModelSerializer):
             "state",
             "provider_status",
         ]
-
-
-# Voucher view serializer-----
-
-
 
 class VoucherListSerializer(serializers.ModelSerializer):
     dc_name = serializers.CharField(source="provider.center_name", read_only=True)

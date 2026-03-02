@@ -8,12 +8,7 @@ from apps.core.models import BaseModel
 from apps.client.models import Client
 from apps.master_management.models import MasterVisitType , City
 from apps.core.choices import GENDER_CHOICES
-
-
 class TestPackage(BaseModel):
-
-    
-
     COMPLIMENTARY_CHOICES = (
         ("Complimentary", "Complimentary"),
         ("TBA", "TBA"),
@@ -52,7 +47,6 @@ class TestPackage(BaseModel):
         null=True
     )
 
-    # ✅ tests included (filtered by client in API)
     tests_included = models.ManyToManyField(
         IndividualTest,
         blank=True

@@ -9,8 +9,6 @@ from apps.master_management.models import (
     MasterInsuranceCompany
 )
 from apps.core.choices import GENDER_CHOICES
-
-
 class SecondOpinionCase(BaseModel):
     class CaseType(models.TextChoices):
         INTERPRETATION = 'Interpretation', 'Interpretation'
@@ -26,26 +24,21 @@ class SecondOpinionCase(BaseModel):
         SMS = 'SMS', 'SMS'
         FTP = 'FTP', 'FTP'
 
-    # Case Information
     case_type = models.CharField(max_length=50, choices=CaseType.choices)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
     client_customer = models.ForeignKey(ClientCustomer, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Customer Details
     customer_name = models.CharField(max_length=200, blank=True, null=True) 
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     relationship = models.ForeignKey(MasterRelationship, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Policy Details
     application_number = models.CharField(max_length=100)
     policy_number = models.CharField(max_length=100)
     insurance_company = models.ForeignKey(MasterInsuranceCompany, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Location
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Case Processing
     case_received_mode = models.CharField(max_length=50, choices=ReceivedMode.choices, null=True, blank=True)
     interpretation_type = models.CharField(max_length=50, choices=InterpretationType.choices, null=True, blank=True)
     
@@ -56,7 +49,6 @@ class SecondOpinionCase(BaseModel):
         null=True,
         blank=True
     )
-
     class CaseStatus(models.TextChoices):
         UNASSIGNED = 'Unassigned', 'Unassigned'
         ASSIGNED = 'Assigned', 'Assigned'

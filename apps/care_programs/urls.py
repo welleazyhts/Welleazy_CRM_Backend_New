@@ -3,12 +3,8 @@ from rest_framework.routers import DefaultRouter
 
 from apps.care_programs.views import CareProgramCaseViewSet, ClosedCareProgramCaseViewSet, OpenCareProgramCaseViewSet
 
-
-
 router = DefaultRouter()
 router.register(r'care-program-cases',CareProgramCaseViewSet,basename='care-program-cases')
-
-
 
 urlpatterns = [
     path('', include(router.urls)),

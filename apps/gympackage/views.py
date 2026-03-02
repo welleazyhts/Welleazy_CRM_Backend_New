@@ -1,8 +1,4 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-
 from rest_framework.viewsets import ModelViewSet
 from .models import GymPackage , PackagePriceType
 from .serializers import GymPackageSerializer , PackagePriceTypeSerializer
@@ -15,10 +11,6 @@ from django.http import HttpResponse
 from rest_framework.decorators import action
 from openpyxl import Workbook
 
-
-
-# VIEW OF MASTER TABLE----
-
 class PackagePriceViewSet(ModelViewSet):
     queryset = PackagePriceType.objects.all().order_by('name')
     serializer_class = PackagePriceTypeSerializer
@@ -29,10 +21,6 @@ class PackagePriceViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-
-# MAIN VIEWSET-----
 
 class GymPackageViewSet(ModelViewSet):
     queryset = GymPackage.objects.all().order_by('-created_at')
@@ -52,8 +40,6 @@ class GymPackageViewSet(ModelViewSet):
     ]
 
     filterset_class = GymPackageFilter
-
-# CSV EXPORT---
 
     @action(detail=False, methods=["get"], url_path="export-csv")
     def export_csv(self, request):
@@ -90,7 +76,6 @@ class GymPackageViewSet(ModelViewSet):
 
         return response
     
-# EXCEL EXPORT----
     @action(detail=False, methods=["get"], url_path="export-excel")
     def export_excel(self, request):
         queryset = self.filter_queryset(self.get_queryset())

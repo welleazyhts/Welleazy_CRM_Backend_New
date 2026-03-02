@@ -105,23 +105,19 @@ class IndividualClient(BaseModel):
         ('Inactive', 'Inactive'),
     ]
     
-    # Personal Information
     employee_name = models.CharField(max_length=255)
     employee_id = models.CharField(max_length=100, unique=True)
     contact_no = models.CharField(max_length=20)
     company_email = models.EmailField()
     
-    # Company Details
     company_name = models.CharField(max_length=255)
     company_address = models.TextField(blank=True, null=True)
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Personal Details
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     
-    # Insurance Information
     type_of_insurance = models.ForeignKey(
         MasterTypeOfInsurance, 
         on_delete=models.SET_NULL, 
@@ -140,7 +136,6 @@ class IndividualClient(BaseModel):
     premium_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sum_assured = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     
-    # Document and Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
     
     def __str__(self):

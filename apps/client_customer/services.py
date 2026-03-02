@@ -1,12 +1,10 @@
 from django.db import transaction
 from .models import ClientCustomer, ClientCustomerAddress, ClientCustomerDependent
 from apps.master_management.models import MasterProductSubCategory, MasterRelationship
-
 class ClientCustomerService:
     @staticmethod
     @transaction.atomic
     def upsert_customer(user, data, instance=None):
-        #Creates or updates a ClientCustomer along with nested addresses and dependents.
         addresses_data = data.pop('addresses', None)
         dependents_data = data.pop('dependents', None)
         services_data = data.pop('services', None)
@@ -20,7 +18,6 @@ class ClientCustomerService:
             else:
                 processed_data[k] = v
 
-        # Create or update instance
         is_new = instance is None
         if is_new:
             instance = ClientCustomer.objects.create(created_by=user, updated_by=user, **processed_data)
@@ -30,21 +27,17 @@ class ClientCustomerService:
             instance.updated_by = user
             instance.save()
 
-        # Handle Many-to-Many services
         if services_data is not None:
             instance.services.set(services_data)
         
-        # Handle Many-to-Many packages
         if packages_data:
             instance.packages.set(packages_data)
         
-        # Handle nested Addresses - Always run on creation to ensure "Self" record
         if addresses_data is not None or is_new:
             if addresses_data is None:
                 addresses_data = []
             default_self_address = ClientCustomerService._sync_addresses(instance, addresses_data)
             
-            # Sync "Self" default address back to main customer fields
             if default_self_address:
                 instance.state = default_self_address.state
                 instance.city = default_self_address.city
@@ -53,7 +46,6 @@ class ClientCustomerService:
                 instance.pincode = default_self_address.pincode
                 instance.save()
 
-        # Handle nested Dependents
         if dependents_data is not None:
             ClientCustomerService._sync_dependents(instance, dependents_data)
 
@@ -94,7 +86,6 @@ class ClientCustomerService:
             addr_id = addr_data.get('id')
             addr_instance = None
             if addr_id:
-                # Update existing address
                 addr_instance = ClientCustomerAddress.objects.get(id=addr_id, customer=customer)
                 for attr, value in addr_data.items():
                     if attr == 'id': continue
@@ -105,7 +96,6 @@ class ClientCustomerService:
                 addr_instance.save()
                 existing_ids.append(addr_id)
             else:
-                # Create new address
                 processed_data = {}
                 for k, v in addr_data.items():
                     if k in ['state', 'city', 'relation_type'] and isinstance(v, int):
@@ -115,11 +105,9 @@ class ClientCustomerService:
                 addr_instance = ClientCustomerAddress.objects.create(customer=customer, **processed_data)
                 existing_ids.append(addr_instance.id)
             
-            # Track default self address for syncing back to parent
             if addr_instance and addr_instance.is_default and addr_instance.relation_type and addr_instance.relation_type.name.upper() == 'SELF':
                 default_self_address = addr_instance
         
-        # Delete addresses not in the provided data
         customer.addresses.exclude(id__in=existing_ids).delete()
         
         return default_self_address
@@ -130,7 +118,6 @@ class ClientCustomerService:
         for dep_data in dependents_data:
             dep_id = dep_data.get('id')
             if dep_id:
-                # Update existing dependent
                 dep_instance = ClientCustomerDependent.objects.get(id=dep_id, customer=customer)
                 for attr, value in dep_data.items():
                     if attr == 'id': continue
@@ -141,7 +128,6 @@ class ClientCustomerService:
                 dep_instance.save()
                 existing_ids.append(dep_id)
             else:
-                # Create new dependent
                 processed_data = {}
                 for k, v in dep_data.items():
                     if k in ['relationship', 'gender'] and isinstance(v, int):
@@ -151,5 +137,4 @@ class ClientCustomerService:
                 dep_instance = ClientCustomerDependent.objects.create(customer=customer, **processed_data)
                 existing_ids.append(dep_instance.id)
 
-        # Delete dependents not in the provided data
         customer.dependents.exclude(id__in=existing_ids).delete()

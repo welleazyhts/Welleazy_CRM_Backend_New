@@ -4,10 +4,6 @@ from .models import *
 from .serializers import *
 from rest_framework.permissions import IsAdminUser
 
-
-# Create your views here.
-
-
 class TestTypeViewSet(ModelViewSet):
     queryset = TestType.objects.all()
     serializer_class = TestTypeSerializer
@@ -18,9 +14,6 @@ class TestTypeViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-
 
 class HealthConcernTypeViewSet(ModelViewSet):
     queryset = HealthConcernType.objects.all()
@@ -56,6 +49,3 @@ class CheckUpTypeViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-

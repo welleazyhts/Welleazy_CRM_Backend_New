@@ -1,7 +1,6 @@
 
 from django.shortcuts import render
 
-# Create your views here.
 import csv
 from django.http import HttpResponse
 from rest_framework.decorators import action
@@ -21,8 +20,6 @@ from openpyxl.utils import get_column_letter
 from rest_framework.response import Response as response
 
 from rest_framework import status
-
-
 class CareProgramViewSet(ModelViewSet):
     queryset = CareProgram.objects.all().order_by('-id')
     serializer_class = CareProgramSerializer
@@ -37,7 +34,7 @@ class CareProgramViewSet(ModelViewSet):
 
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['is_active']          # filter by active/inactive
+    filterset_fields = ['is_active']          
     search_fields = ['care_program_name'] 
 
 
@@ -79,7 +76,6 @@ class CareProgramViewSet(ModelViewSet):
         ws = wb.active
         ws.title = "Care Programs"
 
-    # Header row
         headers = [
             "ID",
             "Care Program Name",
@@ -90,7 +86,6 @@ class CareProgramViewSet(ModelViewSet):
         ]
         ws.append(headers)
 
-    # Data rows
         for obj in queryset:
             ws.append([
                 obj.id,
@@ -101,7 +96,6 @@ class CareProgramViewSet(ModelViewSet):
                 obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
 
-    # Auto-adjust column width
         for col_num, column_title in enumerate(headers, 1):
             ws.column_dimensions[get_column_letter(col_num)].width = 22
 
@@ -112,10 +106,6 @@ class CareProgramViewSet(ModelViewSet):
 
         wb.save(response)
         return response
-
-
-# EYE & DENTAL TREATMENTS VIEWSET-----
-
 
 class EyeDentalTreatmentViewSet(ModelViewSet):
     queryset = EyeDentalTreatment.objects.all().order_by("-id")
@@ -133,7 +123,6 @@ class EyeDentalTreatmentViewSet(ModelViewSet):
 
         treatment_type = self.request.query_params.get("type")
         treatment_name = self.request.query_params.get("treatment_name")
-        # is_active = self.request.query_params.get("is_active")
 
         if treatment_type:
             qs = qs.filter(treatment_type__iexact=treatment_type)
@@ -141,19 +130,7 @@ class EyeDentalTreatmentViewSet(ModelViewSet):
         if treatment_name:
             qs = qs.filter(treatment_name__icontains=treatment_name)
 
-        # if is_active is not None:
-        #     if is_active.lower() in ["true", "1", "yes"]:
-        #         qs = qs.filter(is_active=True)
-        #     elif is_active.lower() in ["false", "0", "no"]:
-        #         qs = qs.filter(is_active=False)
-
         return qs
-    
-
-
-# MEDICAL CAMP VIEWSET-----
-
-
 class MedicalCampViewSet(ModelViewSet):
     queryset = MedicalCamp.objects.all().order_by("-id")
     serializer_class = MedicalCampSerializer
@@ -161,8 +138,6 @@ class MedicalCampViewSet(ModelViewSet):
     queryset = MedicalCamp.objects.select_related(
         "main_client", "sub_client", "package", "tests", "camp_state", "camp_city", "network_provider"
     )
-
-    
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user, updated_by=self.request.user)
@@ -172,19 +147,14 @@ class MedicalCampViewSet(ModelViewSet):
         serializer.save(updated_by=self.request.user)
         instance = self.get_object()
 
-        # Get the new value user is sending (or keep old if not provided)
         new_request_from = self.request.data.get("camp_request_from", instance.camp_request_from)
 
         camp = serializer.save()
 
-        # ✅ If changed to "Main Client", clear sub_client
         if new_request_from == "Main Client":
             if camp.sub_client is not None:
                 camp.sub_client = None
                 camp.save(update_fields=["sub_client"])
-
-    # FILTERS-----
-
     def apply_filters(self, qs, request):
         camp_request_from = request.query_params.get("camp_request_from")
         client_name = request.query_params.get("client_name")
@@ -205,7 +175,6 @@ class MedicalCampViewSet(ModelViewSet):
 
         return qs
     
-    # CAMP LIST---
     @action(detail=False, methods=["get"], url_path="camp-list")
     def camp_list(self, request):
         qs = MedicalCamp.objects.exclude(camp_status="Completed")
@@ -227,7 +196,6 @@ class MedicalCampViewSet(ModelViewSet):
             ids = [i.strip() for i in sub_client.split(",") if i.strip()]
             qs = qs.filter(sub_client_id__in=ids)
 
-        # ✅ Multiple statuses: camp_status=Fresh Case,On Going
         if camp_status:
             statuses = [s.strip() for s in camp_status.split(",") if s.strip()]
             qs = qs.filter(camp_status__in=statuses)
@@ -236,7 +204,6 @@ class MedicalCampViewSet(ModelViewSet):
         return response(serializer.data)
     
 
-    # CLOSED/CAMP COMPLETED LIST---
     @action(detail=False, methods=["get"], url_path="closed-list")
     def closed_list(self, request):
         qs = MedicalCamp.objects.filter(camp_status="Completed")
@@ -265,9 +232,6 @@ class MedicalCampViewSet(ModelViewSet):
         serializer = MedicalCampSerializer(qs, many=True)
         return response(serializer.data)
         
-
-# CASE VIEWSET-----
-
 class CampCaseViewSet(ModelViewSet):
     queryset = CampCase.objects.select_related(
         "camp",
@@ -285,29 +249,20 @@ class CampCaseViewSet(ModelViewSet):
         serializer.save(updated_by=self.request.user)
 
 
-    # CASE LIST WITH FILTERS-----
     def get_queryset(self):
         qs = super().get_queryset()
 
-        # Query params
-        camp_id = self.request.query_params.get("camp_id")        # MedicalCamp ID
-        client_name = self.request.query_params.get("client_name")  # text
+        camp_id = self.request.query_params.get("camp_id")      
+        client_name = self.request.query_params.get("client_name")  
 
-        # Filter by camp (FK id)
         if camp_id:
             ids = [i.strip() for i in camp_id.split(",") if i.strip()]
             qs = qs.filter(camp_id__in=ids)
-        # Filter by client name (from MedicalCamp -> Client)
         if client_name:
             names = [n.strip() for n in client_name.split(",") if n.strip()]
             qs = qs.filter(camp__main_client__corporate_name__in=names)
 
         return qs
-    
-
-# CHP VIEWSET-----
-
-
 class CHPViewSet(ModelViewSet):
     queryset = CHP.objects.select_related("package", "product" , "service")
     serializer_class = CHPSerializer
@@ -318,9 +273,6 @@ class CHPViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-    # FLITERS---
-
     
     def get_queryset(self):
         qs = super().get_queryset()
@@ -353,10 +305,6 @@ class CHPViewSet(ModelViewSet):
             qs = qs.filter(frequency__in=values)
 
         return qs
-    
-
-# OHC  MASTER VIEWSET-----
-
 class TypeOfOHCViewSet(ModelViewSet):
     queryset = TypeOfOHC.objects.all()
     serializer_class = TypeOfOHCSerializer
@@ -367,10 +315,6 @@ class TypeOfOHCViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-# OHC MAIN VIEWSET-----
-
 class OHCViewSet(ModelViewSet):
     queryset = OHC.objects.select_related("type_of_ohc", "client", "doctor")
     serializer_class = OHCSerializer
@@ -392,7 +336,6 @@ class OHCViewSet(ModelViewSet):
 
         doctor = data.get("doctor")
 
-        # ✅ Auto-fetch qualification from Doctor
         qualification = self._get_doctor_qualification_text(doctor)
 
         ohc = OHC.objects.create(
@@ -417,8 +360,8 @@ class OHCViewSet(ModelViewSet):
             client_bill_amount=data.get("client_bill_amount"),
             service_provider_cost=data.get("service_provider_cost"),
 
-            doctor_qualifications=qualification,                 # 🔥 auto-filled
-            doctor_certificate_link=data.get("doctor_certificate_link", ""),  # from frontend
+            doctor_qualifications=qualification,                
+            doctor_certificate_link=data.get("doctor_certificate_link", ""),  
 
             remarks=data.get("remarks", ""),
             created_by=request.user,
@@ -437,15 +380,13 @@ class OHCViewSet(ModelViewSet):
 
         doctor = data.get("doctor", instance.doctor)
 
-        # If doctor changed, refresh qualification
         qualification = self._get_doctor_qualification_text(doctor)
 
-        # Update fields
         for attr, value in data.items():
             setattr(instance, attr, value)
 
         instance.doctor = doctor
-        instance.doctor_qualifications = qualification  # 🔥 always sync from Doctor
+        instance.doctor_qualifications = qualification 
         instance.updated_by = request.user
         instance.save()
 
@@ -473,10 +414,6 @@ class OHCViewSet(ModelViewSet):
             qs = qs.filter(doctor_id__in=ids)
 
         return qs
-    
-
-# EYE PROCEDURE CASE VIEWSET-----
-
 
 class EyeTreatmentCaseViewSet(ModelViewSet):
     queryset = EyeTreatmentCase.objects.all().order_by('-id')
@@ -492,7 +429,6 @@ class EyeTreatmentCaseViewSet(ModelViewSet):
 
         relationship = MasterRelationship.objects.get(id=case_for_id)
 
-        # SELF → no dropdown
         if relationship.name.lower() == 'self':
             return response([])
 
@@ -526,11 +462,6 @@ class EyeTreatmentCaseViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-# DENTAL PROCEDURE CASE VIEWSET-----
-
-
 
 class DentalTreatmentCaseViewSet(ModelViewSet):
     queryset = DentalTreatmentCase.objects.all().order_by('-id')
@@ -570,6 +501,3 @@ class DentalTreatmentCaseViewSet(ModelViewSet):
         ).order_by('name')
 
         return response([{"id": t.id, "name": t.name} for t in qs])
-
-
-   

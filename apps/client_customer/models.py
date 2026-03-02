@@ -131,10 +131,8 @@ class ClientCustomerDependent(BaseModel):
     def save(self, *args, **kwargs):
         if not self.pk:
             count = ClientCustomerDependent.objects.filter(customer=self.customer).count() + 1
-            # Dependent Code based on Employee Code
             if self.customer.employee_code:
                 self.dependent_id = f"{self.customer.employee_code}ID{count}"
-            # Dependent Member ID based on Parent Member ID
             if self.customer.member_id:
                 self.member_id = f"{self.customer.member_id}D{count}"
         super().save(*args, **kwargs)

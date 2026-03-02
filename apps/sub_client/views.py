@@ -76,7 +76,6 @@ class SubClientViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    # HELPER METHODS
 
     def _save_sub_client_fields(self, sub_client, validated):
         simple_fields = [

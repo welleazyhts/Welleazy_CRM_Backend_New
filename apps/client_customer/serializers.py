@@ -3,7 +3,6 @@ from .models import ClientCustomer, ClientCustomerAddress, ClientCustomerDepende
 from apps.master_management.models import MasterProduct, MasterProductSubCategory, State, City, MasterRelationship
 from apps.client.models import Client
 from apps.client_branch.models import ClientBranch
-
 class ClientCustomerAddressSerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='state.name', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
@@ -18,7 +17,6 @@ class ClientCustomerAddressSerializer(serializers.ModelSerializer):
         city = attrs.get('city')
         state = attrs.get('state')
         
-        # Validate city belongs to state
         if city and state and city.state != state:
             raise serializers.ValidationError({
                 "city": f"The selected city '{city.name}' does not belong to the state '{state.name}'."

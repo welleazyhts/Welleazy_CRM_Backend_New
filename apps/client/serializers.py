@@ -169,4 +169,3 @@ class ClientPayloadSerializer(serializers.ModelSerializer):
         validated_data.pop('spocs', None)
         validated_data.pop('documents', None)
         return super().update(instance, validated_data)
-

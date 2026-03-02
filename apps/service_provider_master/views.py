@@ -1,15 +1,8 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from .models import *
 from .serializers import *
-
-
-
 
 class PartnershipTypeViewSet(ModelViewSet):
     queryset = PartnershipType.objects.all()
@@ -21,8 +14,6 @@ class PartnershipTypeViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
 class SpecialtyTypeViewSet(ModelViewSet):
     queryset = SpecialtyType.objects.all()
     serializer_class = SpecialtyTypeSerializer
@@ -34,7 +25,6 @@ class SpecialtyTypeViewSet(ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
 
-
 class OwnershipTypeViewSet(ModelViewSet):
     queryset = OwnershipType.objects.all()
     serializer_class = OwnershipTypeSerializer
@@ -45,9 +35,6 @@ class OwnershipTypeViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
-
 class ServiceCategoryViewSet(ModelViewSet):
     queryset = ServiceCategory.objects.all()
     serializer_class = ServiceCategorySerializer
@@ -58,8 +45,6 @@ class ServiceCategoryViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-
 class RadiologyTypeViewSet(ModelViewSet):
     queryset = RadiologyType.objects.all()
     serializer_class = RadiologyTypeSerializer
@@ -153,5 +138,3 @@ class DepartmentTypeViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
-
-

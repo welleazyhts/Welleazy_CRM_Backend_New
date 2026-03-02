@@ -1,8 +1,4 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,15 +14,11 @@ from .models import (
     DAY_CHOICES
 )
 from .serializers import DoctorSerializer
-
-
-
 class DoctorViewSet(ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
     lookup_field = 'id'
 
-    # ---------------- CREATE ----------------
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -56,7 +48,6 @@ class DoctorViewSet(ModelViewSet):
         doctor.qualifications.set(data.get('qualifications', []))
         doctor.specializations.set(data.get('specializations', []))
 
-        # Services
         for s in data.get('services', []):
             DoctorServicePrice.objects.create(
                 doctor=doctor,
@@ -65,7 +56,6 @@ class DoctorViewSet(ModelViewSet):
                 price=s['price']
             )
 
-        # Availability (copy logic)
         for a in data.get('availability', []):
             if a.get('copy_time_from_montosun'):
                 for day, _ in DAY_CHOICES:
@@ -83,7 +73,6 @@ class DoctorViewSet(ModelViewSet):
             else:
                 DoctorAvailability.objects.create(doctor=doctor , created_by=request.user, **a)
 
-        # Documents
         for d in data.get('documents', []):
             DoctorDocument.objects.create(
                 doctor=doctor,
@@ -92,7 +81,6 @@ class DoctorViewSet(ModelViewSet):
                 document_file=d['document_file']
             )
 
-        # Bank
         DoctorBankDetail.objects.create(
             doctor=doctor,
             created_by=request.user,
@@ -104,13 +92,11 @@ class DoctorViewSet(ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    # ---------------- UPDATE ----------------
     @transaction.atomic
     def update(self, request, *args, **kwargs):
         doctor = self.get_object()
         data = request.data
 
-    # ---------------- MAIN DOCTOR ----------------
         for field in [
             'doctor_name', 'mobile_no', 'alternate_contact', 'email_id',
             'registration_no', 'pan_card', 'address',
@@ -128,7 +114,6 @@ class DoctorViewSet(ModelViewSet):
         doctor.updated_by = request.user
         doctor.save()
 
-    # ---------------- M2M ----------------
         if 'languages' in data:
             doctor.languages.set(data['languages'])
 
@@ -138,7 +123,6 @@ class DoctorViewSet(ModelViewSet):
         if 'specializations' in data:
             doctor.specializations.set(data['specializations'])
 
-    # ---------------- SERVICES (UPSERT) ----------------
         existing_service_ids = set(
             DoctorServicePrice.objects.filter(doctor=doctor)
             .values_list('id', flat=True)
@@ -150,7 +134,6 @@ class DoctorViewSet(ModelViewSet):
             service_row_id = s.get('id')
 
             if service_row_id:
-            # UPDATE
                 DoctorServicePrice.objects.filter(
                     id=service_row_id,
                     doctor=doctor
@@ -161,7 +144,6 @@ class DoctorViewSet(ModelViewSet):
                 )
                 incoming_service_ids.add(service_row_id)
             else:
-            # CREATE
                 obj = DoctorServicePrice.objects.create(
                     doctor=doctor,
                     service_name_id=s['service_name'],
@@ -171,12 +153,10 @@ class DoctorViewSet(ModelViewSet):
                 )
                 incoming_service_ids.add(obj.id)
 
-    # DELETE removed services
         DoctorServicePrice.objects.filter(
             doctor=doctor
         ).exclude(id__in=incoming_service_ids).delete()
 
-    # ---------------- AVAILABILITY (UPSERT + COPY LOGIC) ----------------
         existing_availability_ids = set(
             DoctorAvailability.objects.filter(doctor=doctor)
             .values_list('id', flat=True)
@@ -188,7 +168,6 @@ class DoctorViewSet(ModelViewSet):
             avail_id = a.get('id')
 
             if a.get('copy_time_from_montosun'):
-            # remove same shift first
                 DoctorAvailability.objects.filter(
                     doctor=doctor,
                     shift=a['shift']
@@ -207,7 +186,6 @@ class DoctorViewSet(ModelViewSet):
                     incoming_availability_ids.add(obj.id)
 
             elif avail_id:
-                # UPDATE
                 DoctorAvailability.objects.filter(
                     id=avail_id,
                     doctor=doctor
@@ -221,7 +199,6 @@ class DoctorViewSet(ModelViewSet):
                 incoming_availability_ids.add(avail_id)
 
             else:
-            # CREATE
                 obj = DoctorAvailability.objects.create(
                     doctor=doctor,
                     day=a['day'],
@@ -237,7 +214,6 @@ class DoctorViewSet(ModelViewSet):
             doctor=doctor
         ).exclude(id__in=incoming_availability_ids).delete()
 
-    # ---------------- DOCUMENTS (UPSERT) ----------------
         existing_doc_ids = set(
             DoctorDocument.objects.filter(doctor=doctor)
             .values_list('id', flat=True)
@@ -271,7 +247,6 @@ class DoctorViewSet(ModelViewSet):
             doctor=doctor
         ).exclude(id__in=incoming_doc_ids).delete()
 
-    # ---------------- BANK (UPSERT) ----------------
         if 'bank' in data:
             DoctorBankDetail.objects.update_or_create(
                 doctor=doctor,
@@ -281,7 +256,6 @@ class DoctorViewSet(ModelViewSet):
         return Response(self.get_serializer(doctor).data)
 
 
-    # ---------------- DELETE ----------------
     def destroy(self, request, *args, **kwargs):
         doctor = self.get_object()
         doctor.delete()
@@ -289,9 +263,6 @@ class DoctorViewSet(ModelViewSet):
             {"message": "Doctor Details deleted successfully"},
             status=status.HTTP_204_NO_CONTENT
         )
-    
-
-    # FILTERING THE DOCTOR DETAILS---
 
     
     def get_queryset(self):
@@ -299,7 +270,7 @@ class DoctorViewSet(ModelViewSet):
         params = self.request.query_params
 
         doctor_name = params.get('doctor_name')
-        doctor_id = params.get('doctor_id')   # autogenerated DCWZ...
+        doctor_id = params.get('doctor_id') 
         search = params.get('search')
 
         if doctor_name:
@@ -312,7 +283,6 @@ class DoctorViewSet(ModelViewSet):
                 doctor_id__icontains=doctor_id
             )
 
-        # optional single search box
         if search:
             queryset = queryset.filter(
                 Q(doctor_name__icontains=search) |
@@ -321,14 +291,12 @@ class DoctorViewSet(ModelViewSet):
 
         return queryset
 
-        # For updating the perticular data----
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
         doctor = self.get_object()
         data = request.data
 
-        # ----------- MAIN DOCTOR FIELDS -----------
         for field in [
             'doctor_name', 'mobile_no', 'alternate_contact', 'email_id',
             'registration_no', 'pan_card', 'address',
@@ -338,7 +306,6 @@ class DoctorViewSet(ModelViewSet):
             if field in data:
                 setattr(doctor, field, data[field])
 
-        # ----------- FK FIELDS -----------
         if 'state' in data:
             doctor.state_id = data['state']
         if 'city' in data:
@@ -353,7 +320,6 @@ class DoctorViewSet(ModelViewSet):
         doctor.updated_by = request.user
         doctor.save()
 
-        # ----------- M2M (ONLY IF SENT) -----------
         if 'languages' in data:
             doctor.languages.set(data['languages'])
 
@@ -363,7 +329,6 @@ class DoctorViewSet(ModelViewSet):
         if 'specializations' in data:
             doctor.specializations.set(data['specializations'])
 
-        # ----------- SERVICES (UPSERT ONLY IF SENT) -----------
         if 'services' in data:
             for s in data['services']:
                 service_row_id = s.get('id')
@@ -385,7 +350,6 @@ class DoctorViewSet(ModelViewSet):
                         updated_by=request.user
                     )
 
-        # ----------- AVAILABILITY (ONLY IF SENT) -----------
         if 'availability' in data:
             for a in data['availability']:
                 avail_id = a.get('id')
@@ -425,7 +389,6 @@ class DoctorViewSet(ModelViewSet):
                         updated_by=request.user
                     )
 
-        # ----------- DOCUMENTS (ONLY IF SENT) -----------
         if 'documents' in data:
             for d in data['documents']:
                 doc_id = d.get('id')
@@ -447,7 +410,6 @@ class DoctorViewSet(ModelViewSet):
                         updated_by=request.user
                     )
 
-        # ----------- BANK (ONLY IF SENT) -----------
         if 'bank' in data:
             DoctorBankDetail.objects.update_or_create(
                 doctor=doctor,

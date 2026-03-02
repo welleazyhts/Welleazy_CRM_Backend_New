@@ -13,7 +13,6 @@ from .serializers import (
     SecondOpinionBulkUploadSerializer
 )
 
-
 class SecondOpinionDropdownsAPI(APIView):
     def get(self, request):
         from apps.master_management.models import (
@@ -22,7 +21,6 @@ class SecondOpinionDropdownsAPI(APIView):
         )
         from apps.doctor.models import Doctor
         
-        # Return choices directly from the model
         case_types = [{"id": c[0], "name": c[1]} for c in SecondOpinionCase.CaseType.choices]
         interpretation_types = [{"id": c[0], "name": c[1]} for c in SecondOpinionCase.InterpretationType.choices]
         case_received_modes = [{"id": c[0], "name": c[1]} for c in SecondOpinionCase.ReceivedMode.choices]
@@ -52,10 +50,6 @@ class SecondOpinionDropdownsAPI(APIView):
 
 
 def filter_second_opinion_cases(qs, request):
-    """
-    Reusable helper to apply filters to SecondOpinionCase queryset.
-    """
-    # Filtering
     case_type = request.query_params.get('case_type')
     if case_type:
         qs = qs.filter(case_type=case_type)
@@ -68,8 +62,6 @@ def filter_second_opinion_cases(qs, request):
     if doctor_id:
         qs = qs.filter(doctor_id=doctor_id)
 
-    # Multi-select filters (expecting comma separated or multiple params)
-    # Handling multiple params: ?client=1&client=2
     client_ids = request.query_params.getlist('client')
     if client_ids:
         qs = qs.filter(client_id__in=client_ids)
@@ -78,14 +70,11 @@ def filter_second_opinion_cases(qs, request):
     if case_statuses:
         qs = qs.filter(case_status__in=case_statuses)
         
-    # Search
     app_no = request.query_params.get('application_number')
     if app_no:
         qs = qs.filter(application_number__icontains=app_no)
         
     return qs
-
-
 class SecondOpinionCaseListAPI(APIView):
     def get(self, request):
         qs = SecondOpinionCase.objects.filter(is_active=True).select_related(
@@ -111,8 +100,6 @@ class ClosedSecondOpinionCaseListAPI(APIView):
         
         serializer = SecondOpinionCaseListSerializer(qs, many=True)
         return Response(serializer.data)
-
-
 class SecondOpinionCaseExportAPI(APIView):
     def get(self, request):
         import pandas as pd
@@ -124,11 +111,10 @@ class SecondOpinionCaseExportAPI(APIView):
         
         qs = filter_second_opinion_cases(qs, request)
         
-        # Prepare data for export
         data = []
         for case in qs:
             data.append({
-                "Interpretation Case ID": case.id, # Using ID as Case ID
+                "Interpretation Case ID": case.id, 
                 "Case Entry Date Time": case.created_at.strftime("%d/%m/%Y %H:%M:%S") if case.created_at else "",
                 "Case Type": case.case_type,
                 "Corporate Name": case.client.corporate_name if case.client else "",
@@ -173,7 +159,6 @@ class ClosedSecondOpinionCaseExportAPI(APIView):
         
         qs = filter_second_opinion_cases(qs, request)
         
-        # Prepare data for export
         data = []
         for case in qs:
             data.append({
@@ -220,15 +205,11 @@ class SecondOpinionAssignDoctorAPI(APIView):
         case_ids = serializer.validated_data['case_ids']
         doctor_id = serializer.validated_data['doctor_id']
         
-        # Validate Doctor
         try:
             doctor = Doctor.objects.get(id=doctor_id)
         except Doctor.DoesNotExist:
             return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
             
-        # Update Cases
-        # We also auto-update status to 'Assigned' if it helps, or keep it flexible.
-        # Requirement: "Assign case to doctor" usually implies status change to Assigned
         
         updated_count = SecondOpinionCase.objects.filter(id__in=case_ids).update(
             doctor=doctor,
@@ -248,8 +229,6 @@ class SecondOpinionCaseDetailAPI(generics.RetrieveAPIView):
 class SecondOpinionCaseUpdateAPI(generics.UpdateAPIView):
     queryset = SecondOpinionCase.objects.filter(is_active=True)
     serializer_class = SecondOpinionCaseSerializer
-
-
 class SecondOpinionCaseDeleteAPI(APIView):
     def delete(self, request, pk):
         try:
@@ -263,8 +242,6 @@ class SecondOpinionCaseDeleteAPI(APIView):
             return Response({
                 "error": "Case not found"
             }, status=status.HTTP_404_NOT_FOUND)
-
-
 class SecondOpinionCaseCreateAPI(generics.CreateAPIView):
     queryset = SecondOpinionCase.objects.all()
     serializer_class = SecondOpinionCaseSerializer
@@ -274,18 +251,14 @@ class SecondOpinionCaseCreateAPI(generics.CreateAPIView):
         serializer.save()
     
     def create(self, request, *args, **kwargs):
-        # Use full serializer for input validation
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
-        # Use simplified serializer for response
         from .serializers import SecondOpinionCaseResponseSerializer
         response_serializer = SecondOpinionCaseResponseSerializer(serializer.instance)
         headers = self.get_success_headers(response_serializer.data)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
 class SecondOpinionCaseBulkUploadAPI(APIView):
     parser_classes = (MultiPartParser, FormParser)
     
@@ -295,16 +268,11 @@ class SecondOpinionCaseBulkUploadAPI(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         file_obj = serializer.validated_data['file']
-        # For bulk upload, clients can pass case_type/client as ID or string. 
-        # But our simplified model expects case_type to be a string (Value from choice).
-        # We assume the UI sends the value (e.g. "Interpretation") or we map it if needed. 
-        # Safest is to expect the string value "Interpretation" etc.
         
-        case_type = serializer.validated_data.get('case_type') # Expecting String Value
+        case_type = serializer.validated_data.get('case_type') 
         client_id = serializer.validated_data.get('client')
         
         try:
-            # Validate IDs exist
             if not Client.objects.filter(id=client_id).exists():
                  return Response({"error": "Invalid Client ID"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -316,7 +284,6 @@ class SecondOpinionCaseBulkUploadAPI(APIView):
             print(f"DEBUG: Receiving file '{file_obj.name}' (lower: '{filename}')")
 
             try:
-                # Explicitly try import to see if it works here
                 import xlrd
                 print(f"DEBUG: xlrd imported successfully: {xlrd.__version__} at {xlrd.__file__}")
             except ImportError as e:
@@ -328,41 +295,27 @@ class SecondOpinionCaseBulkUploadAPI(APIView):
                 elif filename.endswith('.xlsx'):
                     df = pd.read_excel(file_obj, engine='openpyxl')
                 else:
-                    # Default to xlrd for .xls
                     print("DEBUG: Attempting to read with xlrd")
                     df = pd.read_excel(file_obj, engine='xlrd')
 
             except ImportError as ie:
-                # Catch library missing errors specifically
                 print(f"DEBUG: ImportError: {ie}")
                 raise Exception(f"Library Import Error: {str(ie)}. Ensure xlrd/openpyxl are installed.")
             except Exception as e:
-                # Catch format errors
                 print(f"DEBUG: Read Error: {e}")
                 raise Exception(f"Failed to read file: {str(e)}")
             
-            # Normalize column names to handle whitespace/case
-            df.columns = [str(col).strip().lower() for col in df.columns]
-
-            # Map expected headers (lowercase for comparison)
-            # Expected: "customer name", "application no", "policy no", "case received mode", "interpretation type"
-            
+            df.columns = [str(col).strip().lower() for col in df.columns]            
             created_count = 0
             errors = []
             
             with transaction.atomic():
                 for index, row in df.iterrows():
                     try:
-                        # Skip rows that appear to be instructions (e.g., if 'interpretation type' contains '1=ECG')
-                        # or if critical fields are clearly instructional text.
                         raw_interp = str(row.get('interpretation type', ''))
                         if '1=ECG' in raw_interp or '2=TMT' in raw_interp:
                             continue
-                            
-                        # Extract row data safely. Using 'get' allows it to fail gracefully or default
-                        # Assuming pandas converts spaces to match.
-                        # Look for potential column variations
-                        
+                                                
                         def get_val(possible_names):
                             for name in possible_names:
                                 if name in df.columns:
@@ -376,32 +329,25 @@ class SecondOpinionCaseBulkUploadAPI(APIView):
                         mode_str = get_val(["case received mode", "mode", "case_received_mode"])
                         interp_str = get_val(["interpretation type", "interpretation_type"])
                         
-                        # Fix: If app_no matches example text/headers, skip it
                         if app_no.lower() in ['application no', 'app-001'] and customer_name.lower() in ['customer name', 'rahul sharma']:
-                             # This might be an example row or repeat header
                              pass 
                         
                         if not app_no or app_no.lower() == 'nan':
-                            # Skip empty rows
-                            continue
-
-                        # No DB Lookup needed for modes/types anymore. We save the string directly.
-                        # Ideally we validate against choices, but flexible string is okay for now.
-                        
+                            continue                        
                         SecondOpinionCase.objects.create(
-                            case_type=case_type, # Saved as string
+                            case_type=case_type, 
                             client_id=client_id,
                             customer_name=customer_name,
                             application_number=app_no,
                             policy_number=policy_no,
-                            case_received_mode=mode_str, # Saved as string
-                            interpretation_type=interp_str, # Saved as string
+                            case_received_mode=mode_str, 
+                            interpretation_type=interp_str, 
                             remark="Bulk Uploaded",
                             is_active=True
                         )
                         created_count += 1
                     except Exception as e:
-                        errors.append(f"Row {index + 2}: {str(e)}") # +2 for 1-based index + header
+                        errors.append(f"Row {index + 2}: {str(e)}") 
             
             if errors:
                 return Response({

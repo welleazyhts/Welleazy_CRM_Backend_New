@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-
 import uuid
 import base64
 from django.db import models
@@ -28,19 +25,9 @@ from apps.master_management.models import (
     MasterVisitType,
     
     State)
-# from apps.admin_app.modules.clients.models import Client
-# from apps.locations.models import City, State
-
-
-# =====================================================
-# SERVICE PROVIDER (MAIN)
-# =====================================================
 class ServiceProvider(BaseModel):
 
-    # ---------- IDENTIFIERS ----------
     sp_code = models.CharField(max_length=50, unique=True, null=True, blank=True)
-
-
     status = models.CharField(
         max_length=20,
         choices=[
@@ -54,7 +41,6 @@ class ServiceProvider(BaseModel):
 
     is_active = models.BooleanField(default=True)
 
-    # ---------- MASTER FKs ----------
     provider_type = models.ForeignKey(MasterTypeOfProvider, on_delete=models.PROTECT)
     partnership_type = models.ForeignKey(PartnershipType, on_delete=models.PROTECT)
     specialty_type = models.ForeignKey(SpecialtyType, on_delete=models.PROTECT)
@@ -63,10 +49,6 @@ class ServiceProvider(BaseModel):
     visit_type = models.ForeignKey(MasterVisitType, on_delete=models.PROTECT)
     dc_unique_name = models.ForeignKey(DCUniqueName, on_delete=models.PROTECT)
 
-
-   
-
-    # ---------- CORPORATE ----------
     corporate_group = models.CharField(
         max_length=3,
         choices=[
@@ -80,7 +62,6 @@ class ServiceProvider(BaseModel):
     
     client_company = models.ManyToManyField(Client, related_name="service_providers", blank=True)
 
-    # ---------- BASIC DETAILS ----------
     center_name = models.CharField(max_length=255)
     email = models.EmailField()
     mobile = models.CharField(max_length=15)
@@ -106,10 +87,8 @@ class ServiceProvider(BaseModel):
 
     vendor_registration_name = models.CharField(max_length=255, null=True, blank=True)
 
-    # ---------- SPECIALITIES ----------
     medical_specialties = models.ManyToManyField(MasterSpeciality, blank=True)
 
-    # ---------- OTHER ----------
     mou_signed = models.BooleanField(default=False)
     mou_received_date = models.DateField(null=True, blank=True)
     remarks = models.TextField(null=True, blank=True)
@@ -123,11 +102,6 @@ class ServiceProvider(BaseModel):
 
     def __str__(self):
         return self.center_name
-
-
-# =====================================================
-# SPOC
-# =====================================================
 class SPOC(BaseModel):
     provider = models.ForeignKey(
         ServiceProvider, related_name="spocs", on_delete=models.CASCADE
@@ -136,19 +110,12 @@ class SPOC(BaseModel):
     designation = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
-
-
-# =====================================================
-# RECOGNITION & MANPOWER
-# =====================================================
 class ProviderRecognition(BaseModel):
     provider = models.OneToOneField(
         ServiceProvider, related_name="recognition", on_delete=models.CASCADE
     )
     recognitions = models.ManyToManyField("service_provider_master.Recognition")
     accreditations = models.ManyToManyField("service_provider_master.Accreditation")
-
-
 class ProviderManpower(BaseModel):
     provider = models.OneToOneField(
         ServiceProvider, related_name="manpower", on_delete=models.CASCADE
@@ -156,10 +123,6 @@ class ProviderManpower(BaseModel):
     full_time_doctors = models.IntegerField(default=0)
     visiting_doctors = models.IntegerField(default=0)
 
-
-# =====================================================
-# DEPARTMENT CONTACTS
-# =====================================================
 class DepartmentContact(BaseModel):
     provider = models.ForeignKey(
         ServiceProvider, related_name="department_contacts", on_delete=models.CASCADE
@@ -178,11 +141,6 @@ class DepartmentContact(BaseModel):
     designation = models.CharField(max_length=150, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     cell_no = models.CharField(max_length=20, null=True, blank=True)
-
-
-# =====================================================
-# SERVICES
-# =====================================================
 class ProviderService(BaseModel):
     provider = models.OneToOneField(
         ServiceProvider, related_name="service", on_delete=models.CASCADE
@@ -210,11 +168,6 @@ class ProviderService(BaseModel):
     health_checkup = models.BooleanField(default=False)
     bls_ambulances = models.IntegerField(default=0)
     acls_ambulances = models.IntegerField(default=0)
-
-
-# =====================================================
-# RADIOLOGY
-# =====================================================
 class RadiologyItem(BaseModel):
     provider = models.ForeignKey(
         ServiceProvider, related_name="radiologies", on_delete=models.CASCADE
@@ -239,10 +192,6 @@ class RadiologyItem(BaseModel):
     time_from = models.TimeField(null=True, blank=True)
     time_to = models.TimeField(null=True, blank=True)
 
-
-# =====================================================
-# BANK DETAILS
-# =====================================================
 class BankDetails(BaseModel):
     provider = models.OneToOneField(
         ServiceProvider, related_name="bank", on_delete=models.CASCADE
@@ -255,11 +204,6 @@ class BankDetails(BaseModel):
     preffered_payment_term = models.ForeignKey(PaymentTerm, on_delete=models.PROTECT)
     cancelled_cheques = models.FileField(upload_to="bank_details/provider_bank_cheques/", null=True, blank=True)
 
-
-
-# =====================================================
-# DISCOUNTS & VOUCHERS
-# =====================================================
 class ProviderDiscount(BaseModel):
     provider = models.ForeignKey(
         ServiceProvider, related_name="discounts", on_delete=models.CASCADE
@@ -310,14 +254,6 @@ class ProviderVoucher(BaseModel):
             self.voucher_id = f"WEZY{next_id:05d}"
         super().save(*args, **kwargs)
 
-
-
-
-# TO UPLOAD DOCUMENTS AFTER THE FIRST PROCEDURE----
-
-
-# models.py
-
 def upload_to(instance, filename):
     return f"provider_documents/{instance.provider.id}/{filename}"
 
@@ -328,7 +264,6 @@ class ProviderDocuments(BaseModel):
         on_delete=models.CASCADE
     )
 
-    # File uploads
     dc_logo = models.FileField(upload_to=upload_to, null=True, blank=True)
     dc_photo = models.FileField(upload_to=upload_to, null=True, blank=True)
 
@@ -341,18 +276,8 @@ class ProviderDocuments(BaseModel):
     mou_signed_copy = models.FileField(upload_to=upload_to, null=True, blank=True)
     other_document = models.FileField(upload_to=upload_to, null=True, blank=True)
 
-  
-
     def __str__(self):
         return f"Documents for {self.provider.center_name}"
-
-
-
-# GENERATE THE LINK FOR PROVIDER REGISTRATION------
-
-
-
-
 class ProviderRegistrationLink(BaseModel):
     hospital_name = models.CharField(max_length=255)
     concerned_person_name = models.CharField(max_length=150)
@@ -381,4 +306,3 @@ class ProviderRegistrationLink(BaseModel):
 
     def __str__(self):
         return f"{self.hospital_name} – Registration Link"
-

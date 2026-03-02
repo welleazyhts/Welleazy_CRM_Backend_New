@@ -13,7 +13,6 @@ from .serializers import ClientCustomerSerializer
 from .filters import ClientCustomerFilter
 from .services import ClientCustomerService
 
-
 class ClientCustomerViewSet(viewsets.ModelViewSet):
     queryset = ClientCustomer.objects.all().order_by('-created_at')
     serializer_class = ClientCustomerSerializer
@@ -43,8 +42,6 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         service = ClientCustomerService()
         try:
-            # For partial updates, we might need more care with nested data
-            # but currently upsert_customer handles what's passed in data.
             instance = service.upsert_customer(request.user, request.data, instance=instance)
             serializer = self.get_serializer(instance)
             return Response(
@@ -89,7 +86,6 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
         employee_code = request.query_params.get('employee_code')
         count = request.query_params.get('count')
 
-        # If customer_id is provided, fetch details from DB and auto-calculate next count
         if customer_id:
             try:
                 customer = ClientCustomer.objects.get(id=customer_id)
@@ -100,7 +96,6 @@ class ClientCustomerViewSet(viewsets.ModelViewSet):
             except ClientCustomer.DoesNotExist:
                 return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        # Default count to 1 if not provided/calculated
         try:
             count = int(count) if count else 1
         except ValueError:

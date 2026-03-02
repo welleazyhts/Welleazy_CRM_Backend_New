@@ -60,7 +60,6 @@ class ClientLoginSerializer(serializers.ModelSerializer):
              raise serializers.ValidationError({"employee": "User with this employee's mobile number already exists."})
 
         with transaction.atomic():
-            # Create User
             user = User.objects.create_user(
                 email=email,
                 password=password,
@@ -68,14 +67,12 @@ class ClientLoginSerializer(serializers.ModelSerializer):
                 name=employee.customer_name
             )
             
-            # Create Client Login with the custom username
             client_login = ClientLogin.objects.create(
                 user=user, 
                 username=username,
                 **validated_data
             )
             
-            # Set Permissions
             if permissions:
                 client_login.permissions.set(permissions)
                 
@@ -85,17 +82,14 @@ class ClientLoginSerializer(serializers.ModelSerializer):
         permissions = validated_data.pop('permissions', None)
         password = validated_data.pop('password', None)
         
-        # Update User password if provided
         if password:
             instance.user.set_password(password)
             instance.user.save()
 
-        # Update ClientLogin fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Update Permissions
         if permissions is not None:
             instance.permissions.set(permissions)
 

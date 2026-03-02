@@ -13,8 +13,6 @@ router.register(r"ohc", OHCViewSet, basename="ohc")
 router.register(r'eye-treatment-cases',EyeTreatmentCaseViewSet,basename='eye-treatment-cases')
 router.register(r'dental-treatment-cases', DentalTreatmentCaseViewSet, basename='dental-treatment-cases')
 
-
-
 urlpatterns = [
     path('', include(router.urls)),
 ]

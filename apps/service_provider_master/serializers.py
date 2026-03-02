@@ -1,29 +1,18 @@
 from rest_framework import serializers
 from .models import *
-
-
-
 class BaseMasterSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["id", "name", "created_at" , "updated_at" , "created_by" , "updated_by" ]
-
-
 class PartnershipTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = PartnershipType
-
-
 class SpecialtyTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = SpecialtyType
 
-
 class OwnershipTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = OwnershipType
-
-
-
 
 class ServiceCategorySerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
@@ -66,4 +55,3 @@ class AccreditationSerializer(BaseMasterSerializer):
 class DepartmentTypeSerializer(BaseMasterSerializer):
     class Meta(BaseMasterSerializer.Meta):
         model = DepartmentType
-
